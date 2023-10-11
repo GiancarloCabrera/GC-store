@@ -7,7 +7,13 @@ import { APP_GUARD } from '@nestjs/core';
 import { ApiKeyGuard } from './auth/apiKeyAuth/apikey.guard';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { ProductsModule } from './products/products.module';
+import { OpinionsModule } from './opinions/opinions.module';
+import { KeywordsModule } from './keywords/keywords.module';
 import User from './users/user.entity';
+import Product from './products/products.entity';
+import Opinion from './opinions/opinions.entity';
+import Keyword from './keywords/keywords.entity';
 
 @Module({
   imports: [
@@ -23,13 +29,16 @@ import User from './users/user.entity';
       password: 'GIAN_PG_ADMIN_DB_PS',
       database: 'GC-store',
       // Read all entities inside src
-      // entities: [__dirname + '/**/*.entity{.ts,.js'],
-      entities: [User],
+      // entities: [__dirname + '/src/**/*.entity{.ts,.js'],
+      entities: [User, Product, Opinion, Keyword],
       // Not recommended to use on prod, this is to sync db tables with ptoject tables
       synchronize: true,
     }),
     AuthModule,
-    UsersModule
+    UsersModule,
+    ProductsModule,
+    OpinionsModule,
+    KeywordsModule
   ],
   controllers: [AppController],
   providers: [
