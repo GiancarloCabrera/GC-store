@@ -1,6 +1,7 @@
 import Keyword from "src/keywords/keywords.entity"
 import Opinion from "src/opinions/opinions.entity"
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import ProductImages from "./productsImages.entity"
 
 @Entity()
 export default class Product {
@@ -43,9 +44,8 @@ export default class Product {
   @Column()
   on_stock: boolean
 
-  // Images
-  // -------------------
-  // -------------------
+  @OneToMany(type => ProductImages, productImages => productImages.product)
+  images: ProductImages[]
 
   @Column()
   shipment_details: string

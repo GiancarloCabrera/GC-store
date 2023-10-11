@@ -14,6 +14,7 @@ import User from './users/user.entity';
 import Product from './products/products.entity';
 import Opinion from './opinions/opinions.entity';
 import Keyword from './keywords/keywords.entity';
+import ProductImages from './products/productsImages.entity';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import Keyword from './keywords/keywords.entity';
       database: 'GC-store',
       // Read all entities inside src
       // entities: [__dirname + '/src/**/*.entity{.ts,.js'],
-      entities: [User, Product, Opinion, Keyword],
+      entities: [User, Product, ProductImages, Opinion, Keyword],
       // Not recommended to use on prod, this is to sync db tables with ptoject tables
       synchronize: true,
     }),
