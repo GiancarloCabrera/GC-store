@@ -1,7 +1,7 @@
 import Keyword from "src/keywords/keywords.entity"
 import Opinion from "src/opinions/opinions.entity"
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import ProductImages from "./productsImages.entity"
+import ProductImages from "../products-images/products-images.entity"
 
 @Entity()
 export default class Product {
@@ -52,7 +52,7 @@ export default class Product {
 
   @ManyToMany(type => Keyword)
   @JoinTable()
-  keywords: Keyword
+  keywords: Keyword[]
 
   @OneToMany(type => Opinion, opinion => opinion.product)
   opinions: Opinion[]

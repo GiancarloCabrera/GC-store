@@ -10,11 +10,12 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { OpinionsModule } from './opinions/opinions.module';
 import { KeywordsModule } from './keywords/keywords.module';
+import { ProductsImagesModule } from './products-images/products-images.module';
 import User from './users/user.entity';
 import Product from './products/products.entity';
 import Opinion from './opinions/opinions.entity';
 import Keyword from './keywords/keywords.entity';
-import ProductImages from './products/productsImages.entity';
+import ProductImages from './products-images/products-images.entity';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import ProductImages from './products/productsImages.entity';
     UsersModule,
     ProductsModule,
     OpinionsModule,
-    KeywordsModule
+    KeywordsModule,
+    ProductsImagesModule
   ],
   controllers: [AppController],
   providers: [
