@@ -18,7 +18,6 @@ export class ProductsService {
     private productImagesService: ProductImagesService
   ) { }
 
-  // MISSING TYPE
   async createProduct(product: CreateProductDto) {
     const new_product = new Product();
     new_product.name = product.name
@@ -44,6 +43,34 @@ export class ProductsService {
 
 
     console.log("Final Product: ", new_product);
-    return this.productRepository.save(new_product);
+    return await this.productRepository.save(new_product);
+  }
+
+  async deleteProduct(id: number) {
+    // Find the product
+    const product = await this.productRepository.findOne({
+      relations: {
+        images: true,
+        keywords: true
+      },
+      where: {
+        id
+      }
+    });
+
+    console.log('PRODUCT: ', product);
+
+    // Delete product Images -- THIS SHOULD BE ON THE SERVICE
+    const removedImgs = product.images.forEach(async (img) => await this.productImageRepository.remove(img));
+
+    console.log('RMEOVED IMG: ', removedImgs);
+    // Delete keyword
+    // product.keywords.forEach((keyword) => {
+    //   keyword.products = keyword.products.filter((p) => p.id !== productId);
+    // });
+
+    // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
+    return await this.productRepository.remove(product)
+
   }
 }
