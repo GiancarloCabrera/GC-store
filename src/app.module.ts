@@ -24,12 +24,12 @@ import ProductImages from './products-images/products-images.entity';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'postgres',
-      password: 'GIAN_PG_ADMIN_DB_PS',
-      database: 'GC-store',
+      type: "postgres",
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       // Read all entities inside src
       // entities: [__dirname + '/src/**/*.entity{.ts,.js'],
       entities: [User, Product, ProductImages, Opinion, Keyword],
