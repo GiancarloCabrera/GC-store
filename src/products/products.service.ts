@@ -32,6 +32,8 @@ export class ProductsService {
     new_product.model_num = product.model_num
     new_product.serie = product.serie
     new_product.on_stock = product.on_stock
+
+    // THISSS HAVE TO BE SEPARATEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
     // Association
     // Product ---> group of its images
     new_product.images = await this.productImagesService.createProductImages({ images: product.images });

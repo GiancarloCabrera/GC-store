@@ -13,8 +13,7 @@ export default class Opinion {
   @ManyToOne(type => Product, product => product.opinions)
   product: Product
 
-  @OneToOne(type => User)
-  @JoinColumn()
+  @ManyToOne(type => User, user => user.opinions)
   user: User
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })

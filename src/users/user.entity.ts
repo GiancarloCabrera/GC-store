@@ -1,5 +1,5 @@
 import Opinion from "src/opinions/opinions.entity"
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 
 @Entity()
 export default class User {
@@ -12,9 +12,8 @@ export default class User {
   @Column()
   password: string
 
-  // OPINIONS
-  // @OneToMany(type => Opinion, opinion: opinion.)
-  //   Opinions: Opinion[]
+  @OneToMany(type => Opinion, opinion => opinion.user, { nullable: true })
+  opinions: Opinion[]
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
   createdAt: Date
