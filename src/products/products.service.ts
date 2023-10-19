@@ -6,6 +6,7 @@ import { CreateProductDto } from "./dto/create-product.dto";
 import ProductImages from "../products-images/products-images.entity";
 import Keyword from "src/keywords/keywords.entity";
 import Opinion from "src/opinions/opinions.entity";
+import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Injectable()
 export class ProductsService {
@@ -22,20 +23,6 @@ export class ProductsService {
 
   async createProduct(product: CreateProductDto) {
     try {
-      const new_product = new Product();
-      new_product.name = product.name
-      new_product.description = product.description
-      new_product.size = product.size
-      new_product.color = product.color
-      new_product.price = product.price
-      new_product.category = product.category
-      new_product.genre = product.genre
-      new_product.material = product.material
-      new_product.care_instruc = product.care_instruc
-      new_product.model_num = product.model_num
-      new_product.serie = product.serie
-      new_product.on_stock = product.on_stock
-
       const p_images = [];
       for (const img of product.images) {
         let p_img = new ProductImages();
@@ -48,8 +35,7 @@ export class ProductsService {
 
       // Association
       // Product ---> group of its images
-      new_product.images = p_images;
-      new_product.shipment_details = product.shipment_details;
+      product.images = p_images;
 
       const keywords_list = [];
       for (const keyStr of product.keywords) {
@@ -72,8 +58,7 @@ export class ProductsService {
 
       // Association
       // Product ---> group of its keywords
-      new_product.keywords = keywords_list;
-      new_product.status = product.status;
+      product.keywords = keywords_list;
 
       // if (product.opinions) {
       //   const opinions_list = []
@@ -87,6 +72,10 @@ export class ProductsService {
       //   }
       //   new_product.opinions = opinions_list;
       // }
+
+      const new_product = new Product();
+      Object.assign(new_product, product);
+
       return await this.productRepository.save(new_product);
     } catch (error) {
       throw error;
@@ -126,6 +115,26 @@ export class ProductsService {
     } catch (error) {
       throw error;
     }
+  }
 
+  async updateProduct(product: UpdateProductDto) {
+    try {
+      const product_found = await this.productRepository.findOne({
+        relations: {
+          opinions: true
+        },
+        where: {
+          id: product.id
+        }
+      });
+
+      if (!product_found) throw new BadRequestException('Product not found...');
+      Object.assign(product_found, product)
+      console.log(product_found);
+
+      // PENDING TO ADD UPDATED PRODUCT
+    } catch (error) {
+      throw error;
+    }
   }
 }
