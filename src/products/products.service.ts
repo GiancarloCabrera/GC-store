@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import Product from "./products.entity";
 import { Repository } from "typeorm";
 import { CreateProductDto } from "./dto/create-product.dto";
 import ProductImages from "../products-images/products-images.entity";
-import { KeywordsService } from "src/keywords/keywords.service";
-import { ProductImagesService } from "src/products-images/products-images.service";
+import Keyword from "src/keywords/keywords.entity";
+import Opinion from "src/opinions/opinions.entity";
 
 @Injectable()
 export class ProductsService {
@@ -14,65 +14,118 @@ export class ProductsService {
     private productRepository: Repository<Product>,
     @InjectRepository(ProductImages)
     private productImageRepository: Repository<ProductImages>,
-    private keywordsService: KeywordsService,
-    private productImagesService: ProductImagesService
+    @InjectRepository(Keyword)
+    private keywordRepository: Repository<Keyword>,
+    @InjectRepository(Opinion)
+    private opinionRepository: Repository<Opinion>,
   ) { }
 
   async createProduct(product: CreateProductDto) {
-    const new_product = new Product();
-    new_product.name = product.name
-    new_product.description = product.description
-    new_product.size = product.size
-    new_product.color = product.color
-    new_product.price = product.price
-    new_product.category = product.category
-    new_product.genre = product.genre
-    new_product.material = product.material
-    new_product.care_instruc = product.care_instruc
-    new_product.model_num = product.model_num
-    new_product.serie = product.serie
-    new_product.on_stock = product.on_stock
+    try {
+      const new_product = new Product();
+      new_product.name = product.name
+      new_product.description = product.description
+      new_product.size = product.size
+      new_product.color = product.color
+      new_product.price = product.price
+      new_product.category = product.category
+      new_product.genre = product.genre
+      new_product.material = product.material
+      new_product.care_instruc = product.care_instruc
+      new_product.model_num = product.model_num
+      new_product.serie = product.serie
+      new_product.on_stock = product.on_stock
 
-    // THISSS HAVE TO BE SEPARATEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
-    // Association
-    // Product ---> group of its images
-    new_product.images = await this.productImagesService.createProductImages({ images: product.images });
-    new_product.shipment_details = product.shipment_details
-    // Association
-    // Product ---> group of its keywords
-    new_product.keywords = await this.keywordsService.createKeyword({ keywords: product.keywords });
-    new_product.status = product.status
+      const p_images = [];
+      for (const img of product.images) {
+        let p_img = new ProductImages();
+        p_img.path = img;
+        p_img = await this.productImageRepository.save(p_img);
+        p_images.push(p_img);
+      }
 
+      if (!p_images) throw new BadRequestException('Product Images could not be saved...');
 
-    console.log("Final Product: ", new_product);
-    return await this.productRepository.save(new_product);
+      // Association
+      // Product ---> group of its images
+      new_product.images = p_images;
+      new_product.shipment_details = product.shipment_details;
+
+      const keywords_list = [];
+      for (const keyStr of product.keywords) {
+        let keyword = await this.keywordRepository.findOne({
+          where: {
+            keyword: keyStr
+          }
+        });
+
+        if (!keyword) {
+          keyword = new Keyword();
+          keyword.keyword = keyStr;
+          keyword = await this.keywordRepository.save(keyword);
+        }
+
+        keywords_list.push(keyword);
+      }
+
+      if (!keywords_list) throw new BadRequestException('Product Keywords could not be saved...');
+
+      // Association
+      // Product ---> group of its keywords
+      new_product.keywords = keywords_list;
+      new_product.status = product.status;
+
+      // if (product.opinions) {
+      //   const opinions_list = []
+      //   for (const opinion of product.opinions) {
+      //     console.log(opinion);
+
+      //     let new_op = new Opinion();
+      //     new_op.text = opinion;
+      //     new_op = await this.opinionRepository.save(new_op);
+      //     opinions_list.push(new_op)
+      //   }
+      //   new_product.opinions = opinions_list;
+      // }
+      return await this.productRepository.save(new_product);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async deleteProduct(id: number) {
-    // Find the product
-    const product = await this.productRepository.findOne({
-      relations: {
-        images: true,
-        keywords: true
-      },
-      where: {
-        id
+    try {
+      // Find the product
+      const product = await this.productRepository.findOne({
+        relations: {
+          images: true,
+          keywords: true,
+          opinions: true
+        },
+        where: {
+          id
+        }
+      });
+
+      if (!product) throw new BadRequestException('Product not found...');
+
+      // Delete product Images -- THIS SHOULD BE ON THE SERVICE
+      product.images.forEach(async (img) => await this.productImageRepository.remove(img));
+
+      if (product.opinions) {
+        product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
       }
-    });
 
-    console.log('PRODUCT: ', product);
+      // Delete keyword
+      // product.keywords.forEach((keyword) => {
+      //   keyword.products = keyword.products.filter((p) => p.id !== productId);
+      // });
 
-    // Delete product Images -- THIS SHOULD BE ON THE SERVICE
-    const removedImgs = product.images.forEach(async (img) => await this.productImageRepository.remove(img));
-
-    console.log('RMEOVED IMG: ', removedImgs);
-    // Delete keyword
-    // product.keywords.forEach((keyword) => {
-    //   keyword.products = keyword.products.filter((p) => p.id !== productId);
-    // });
-
-    // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
-    return await this.productRepository.remove(product)
+      // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
+      return await this.productRepository.remove(product)
+    } catch (error) {
+      throw error;
+    }
 
   }
 }

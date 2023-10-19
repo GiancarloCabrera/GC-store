@@ -11,15 +11,19 @@ export class ProductImagesService {
   ) { }
 
   async createProductImages({ images }: CreateProductImagesDto) {
-    // PRODUCT IMAGES
-    const p_images = [];
-    for (const img of images) {
-      let p_img = new ProductImages();
-      p_img.path = img;
-      p_img = await this.productImagesRepository.save(p_img);
-      p_images.push(p_img);
-    }
+    try {
 
-    return p_images;
+      // PRODUCT IMAGES
+      const p_images = [];
+      for (const img of images) {
+        let p_img = new ProductImages();
+        p_img.path = img;
+        p_img = await this.productImagesRepository.save(p_img);
+        p_images.push(p_img);
+      }
+      return p_images;
+    } catch (error) {
+
+    }
   }
 }
