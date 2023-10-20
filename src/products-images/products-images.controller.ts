@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Put } from '@nestjs/common';
 import { ProductImagesService } from './products-images.service';
 
 @Controller('products-images')
@@ -6,7 +6,12 @@ export class ProductsImagesController {
   constructor(private productImagesService: ProductImagesService) { }
 
   @Post()
-  createProduct(@Body() newProductImages) {
-    return this.productImagesService.createProductImages(newProductImages);
+  createProductImage(@Body() newProductImages) {
+    return this.productImagesService.createProductImage(newProductImages);
+  }
+
+  @Put()
+  updateProductImage(@Body() newProductImages) {
+    return this.productImagesService.updateProductImage(newProductImages);
   }
 }

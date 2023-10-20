@@ -1,29 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import ProductImages from './products-images.entity';
 import { Repository } from 'typeorm';
-import { CreateProductImagesDto } from './dto/create-product-images';
+import { CreateProductImageDto } from './dto/create-product-images';
+import Product from 'src/products/products.entity';
+import { UpdateProductImageDto } from './dto/update-product-image';
 
 @Injectable()
 export class ProductImagesService {
   constructor(
     @InjectRepository(ProductImages) private productImagesRepository: Repository<ProductImages>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
   ) { }
 
-  async createProductImages({ images }: CreateProductImagesDto) {
+  async createProductImage(image: CreateProductImageDto) {
     try {
+      const product_found = await this.productRepository.findOne({
+        where: {
+          id: image.productId
+        }
+      });
 
-      // PRODUCT IMAGES
-      const p_images = [];
-      for (const img of images) {
-        let p_img = new ProductImages();
-        p_img.path = img;
-        p_img = await this.productImagesRepository.save(p_img);
-        p_images.push(p_img);
-      }
-      return p_images;
+      if (!product_found) throw new BadRequestException('Product not found...');
+
+      let new_img = new ProductImages();
+      Object.assign(new_img, image);
+
+      // Making relation
+      new_img.product = product_found;
+
+      return await this.productImagesRepository.save(new_img);
     } catch (error) {
+      throw error;
+    }
+  }
 
+  async deleteProductImage(id: number) {
+    try {
+      const found_img = await this.productImagesRepository.findOne({
+        where: {
+          id
+        }
+      });
+      console.log(found_img);
+
+      if (!found_img) throw new BadRequestException('Image not found...');
+      return await this.productImagesRepository.remove(found_img);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  async updateProductImage(image: UpdateProductImageDto) {
+    try {
+      const found_img = await this.productImagesRepository.findOne({
+        relations: {
+          product: true
+        },
+        where: {
+          id: image.id
+        }
+      });
+
+      if (!found_img) throw new BadRequestException('Image not found...');
+      Object.assign(found_img, image);
+
+      return await this.productImagesRepository.save(found_img);
+    } catch (error) {
+      throw error;
     }
   }
 }

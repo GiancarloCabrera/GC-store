@@ -7,6 +7,7 @@ import ProductImages from "../products-images/products-images.entity";
 import Keyword from "src/keywords/keywords.entity";
 import Opinion from "src/opinions/opinions.entity";
 import { UpdateProductDto } from "./dto/update-product.dto";
+import { ProductImagesService } from "src/products-images/products-images.service";
 
 @Injectable()
 export class ProductsService {
@@ -19,6 +20,8 @@ export class ProductsService {
     private keywordRepository: Repository<Keyword>,
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
+
+    private productImageService: ProductImagesService
   ) { }
 
   async createProduct(product: CreateProductDto) {
@@ -121,6 +124,8 @@ export class ProductsService {
     try {
       const product_found = await this.productRepository.findOne({
         relations: {
+          keywords: true,
+          images: true,
           opinions: true
         },
         where: {
@@ -129,10 +134,24 @@ export class ProductsService {
       });
 
       if (!product_found) throw new BadRequestException('Product not found...');
-      Object.assign(product_found, product)
-      console.log(product_found);
 
-      // PENDING TO ADD UPDATED PRODUCT
+      const actual_images = product_found.images;
+      const actual_keywords = product_found.keywords;
+      const actual_opinions = product_found.opinions;
+      console.log('PRODUCT FOUND: ', product_found);
+      Object.assign(product_found, product);
+
+      // Images
+      if (product.images) {
+        for (const img of product.images) {
+          const upd_image = await this.productImageService.updateProductImage(img);
+          actual_images.map(img => img.id === upd_image.id ? upd_image : img);
+        }
+        product_found.images = actual_images;
+      }
+      console.log(product_found.images);
+
+      return await this.productRepository.save(product_found);
     } catch (error) {
       throw error;
     }

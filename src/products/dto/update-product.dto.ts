@@ -12,9 +12,14 @@ export class UpdateProductDto {
   model_num?: number
   serie?: number
   on_stock?: boolean
-  images?: string[]
+  images?: image[]
   shipment_details?: string
   keywords?: string[]
   opinions?: string[]
   status?: string
+}
+
+class image {
+  id: number
+  path: string
 }

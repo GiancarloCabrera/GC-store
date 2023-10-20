@@ -1,3 +1,4 @@
-export class CreateProductImagesDto {
-  images: string[]
+export class CreateProductImageDto {
+  path: string
+  productId: number
 }
