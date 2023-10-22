@@ -43,7 +43,6 @@ export class ProductImagesService {
           id
         }
       });
-      console.log(found_img);
 
       if (!found_img) throw new BadRequestException('Image not found...');
       return await this.productImagesRepository.remove(found_img);

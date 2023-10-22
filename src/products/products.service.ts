@@ -8,6 +8,7 @@ import Keyword from "src/keywords/keywords.entity";
 import Opinion from "src/opinions/opinions.entity";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductImagesService } from '../products-images/products-images.service';
+import { KeywordService } from "src/keywords/keywords.service";
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +21,8 @@ export class ProductsService {
     private keywordRepository: Repository<Keyword>,
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
-    private productImageService: ProductImagesService
+    private productImageService: ProductImagesService,
+    // private keywordService: KeywordService
   ) { }
 
   async createProduct(product: CreateProductDto) {
@@ -185,10 +187,20 @@ export class ProductsService {
       }
 
       // Keywords
-      // if(product.keywords) {
-      //   for (const key of product.keywords) {
-      //   }
-      // }
+      if (product.keywords) {
+        const upd_keywords = []
+        for (const keyStr of product.keywords) {
+          let found_keyword = await this.keywordRepository.findOne({
+            where: {
+              id: keyStr.id
+            }
+          });
+
+          if (!found_keyword) throw new BadRequestException(`Keyword ${keyStr.id} not found...`);
+          upd_keywords.push(found_keyword);
+        }
+        product_found.keywords = upd_keywords;
+      }
       console.log(product_found);
 
       return await this.productRepository.save(product_found);

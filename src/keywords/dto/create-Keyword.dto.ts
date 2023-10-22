@@ -1,3 +1,3 @@
 export class CreateKeywordDto {
-  keywords: string[]
+  keyword: string
 }

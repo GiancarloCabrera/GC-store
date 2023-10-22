@@ -4,7 +4,7 @@ export class UpdateProductDto {
   description?: string
   size?: string
   color?: string
-  price?: string
+  price?: number
   category?: string
   genre?: string
   material?: string
