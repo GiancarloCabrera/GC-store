@@ -7,7 +7,7 @@ import ProductImages from "../products-images/products-images.entity";
 import Keyword from "src/keywords/keywords.entity";
 import Opinion from "src/opinions/opinions.entity";
 import { UpdateProductDto } from "./dto/update-product.dto";
-import { ProductImagesService } from "src/products-images/products-images.service";
+import { ProductImagesService } from '../products-images/products-images.service';
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +20,6 @@ export class ProductsService {
     private keywordRepository: Repository<Keyword>,
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
-
     private productImageService: ProductImagesService
   ) { }
 
@@ -138,18 +137,59 @@ export class ProductsService {
       const actual_images = product_found.images;
       const actual_keywords = product_found.keywords;
       const actual_opinions = product_found.opinions;
-      console.log('PRODUCT FOUND: ', product_found);
       Object.assign(product_found, product);
 
       // Images
+      // Update only the image thye sent me
+      // if (product.images) {
+      // for (const img of product.images) {
+      //   const found_img = await this.productImagesRepository.findOne({
+      //     relations: {
+      //       product: true
+      //     },
+      //     where: {
+      //       id: img.id,
+      //     }
+      //   });
+
+      //   if (!found_img) throw new BadRequestException('Image not found...');
+      //   if (found_img.product.id !== product.id) throw new BadRequestException(`Image with id ${found_img.id} is not related to this product...`);
+      //   Object.assign(found_img, img);
+
+      //   const new_img = await this.productImageRepository.save(found_img);
+      //   actual_images.map(img => img.id === new_img.id ? new_img : img);
+      // }
+      // product_found.images = actual_images;
+      // }
+
       if (product.images) {
+        const found_product_img = [];
         for (const img of product.images) {
-          const upd_image = await this.productImageService.updateProductImage(img);
-          actual_images.map(img => img.id === upd_image.id ? upd_image : img);
+          // Update
+          const found_img = await this.productImageService.updateProductImage({
+            id: img.id,
+            path: img.path,
+            productId: product.id
+          });
+          found_product_img.push(found_img);
         }
-        product_found.images = actual_images;
+
+        const imgs_to_delete = actual_images.filter(img_a => {
+          return !found_product_img.some(img_b => img_a.id === img_b.id);
+        });
+
+        // Delete
+        imgs_to_delete.forEach(img => this.productImageService.deleteProductImage(img.id));
+        // Make the relation
+        product_found.images = found_product_img;
       }
-      console.log(product_found.images);
+
+      // Keywords
+      // if(product.keywords) {
+      //   for (const key of product.keywords) {
+      //   }
+      // }
+      console.log(product_found);
 
       return await this.productRepository.save(product_found);
     } catch (error) {

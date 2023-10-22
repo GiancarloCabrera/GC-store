@@ -55,16 +55,18 @@ export class ProductImagesService {
 
   async updateProductImage(image: UpdateProductImageDto) {
     try {
+      const p_id = image.productId ? image.productId : null
       const found_img = await this.productImagesRepository.findOne({
         relations: {
           product: true
         },
         where: {
-          id: image.id
+          id: image.id,
+          product: { id: p_id }
         }
       });
 
-      if (!found_img) throw new BadRequestException('Image not found...');
+      if (!found_img) throw new BadRequestException(`Image ${image.id} not found or its product Id does not belong to it... `);
       Object.assign(found_img, image);
 
       return await this.productImagesRepository.save(found_img);
