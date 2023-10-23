@@ -14,7 +14,7 @@ export class UpdateProductDto {
   on_stock?: boolean
   images?: image[]
   shipment_details?: string
-  keywords?: keyword[]
+  keywords?: string[]
   opinions?: string[]
   status?: string
 }
