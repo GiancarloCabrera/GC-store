@@ -43,15 +43,17 @@ export class ProductsService {
 
       const keywords_list = [];
       for (const keyStr of product.keywords) {
+        const k_wd = keyStr.toLowerCase();
+
         let keyword = await this.keywordRepository.findOne({
           where: {
-            keyword: keyStr
+            keyword: k_wd
           }
         });
 
         if (!keyword) {
           keyword = new Keyword();
-          keyword.keyword = keyStr;
+          keyword.keyword = k_wd;
           keyword = await this.keywordRepository.save(keyword);
         }
 
@@ -65,16 +67,6 @@ export class ProductsService {
       product.keywords = keywords_list;
 
       // if (product.opinions) {
-      //   const opinions_list = []
-      //   for (const opinion of product.opinions) {
-      //     console.log(opinion);
-
-      //     let new_op = new Opinion();
-      //     new_op.text = opinion;
-      //     new_op = await this.opinionRepository.save(new_op);
-      //     opinions_list.push(new_op)
-      //   }
-      //   new_product.opinions = opinions_list;
       // }
 
       const new_product = new Product();
@@ -88,26 +80,17 @@ export class ProductsService {
 
   async deleteProduct(id: number) {
     try {
-      // Find the product
-      const product = await this.productRepository.findOne({
-        relations: {
-          images: true,
-          keywords: true,
-          opinions: true
-        },
-        where: {
-          id
-        }
-      });
+      const product_found = await this.findProductById(id);
 
-      if (!product) throw new BadRequestException('Product not found...');
-
-      // Delete product Images -- THIS SHOULD BE ON THE SERVICE
-      product.images.forEach(async (img) => await this.productImageRepository.remove(img));
-
-      if (product.opinions) {
-        product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
+      if (!product_found) throw new BadRequestException('Product not found...');
+      console.log(product_found);
+      if (product_found.images) {
+        product_found.images.forEach(async (img) => await this.productImageRepository.remove(img));
       }
+
+      // if (product.opinions) {
+      //   product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
+      // }
 
       // Delete keyword
       // product.keywords.forEach((keyword) => {
@@ -115,7 +98,7 @@ export class ProductsService {
       // });
 
       // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
-      return await this.productRepository.remove(product)
+      return await this.productRepository.remove(product_found);
     } catch (error) {
       throw error;
     }
@@ -123,16 +106,7 @@ export class ProductsService {
 
   async updateProduct(product: UpdateProductDto) {
     try {
-      const product_found = await this.productRepository.findOne({
-        relations: {
-          keywords: true,
-          images: true,
-          opinions: true
-        },
-        where: {
-          id: product.id
-        }
-      });
+      const product_found = await this.findProductById(product.id);
 
       if (!product_found) throw new BadRequestException('Product not found...');
 
@@ -159,6 +133,7 @@ export class ProductsService {
       // product_found.images = actual_images;
       // }
 
+      // Images --> Manipulate the relation & table
       if (product.images) {
         const found_product_img = [];
         for (const img of product.images) {
@@ -181,17 +156,18 @@ export class ProductsService {
         product.images = found_product_img;
       }
 
-      // Keywords
+      // Keywords --> Manipulate only the relation
       if (product.keywords) {
         const upd_keywords = []
         for (const keyStr of product.keywords) {
+          const k_wd = keyStr.toLowerCase();
           let found_keyword = await this.keywordRepository.findOne({
             where: {
-              keyword: keyStr
+              keyword: k_wd
             }
           });
 
-          if (!found_keyword) throw new BadRequestException(`Keyword ${keyStr} not found...`);
+          if (!found_keyword) throw new BadRequestException(`Keyword ${k_wd} not found...`);
           upd_keywords.push(found_keyword);
         }
         product.keywords = upd_keywords;
@@ -205,6 +181,26 @@ export class ProductsService {
       Object.assign(product_found, product);
 
       return await this.productRepository.save(product_found);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findProductById(id: number) {
+    try {
+      const product_found = await this.productRepository.findOne({
+        relations: {
+          images: true,
+          keywords: true,
+          opinions: true
+        },
+        where: {
+          id
+        }
+      });
+
+      if (!product_found) throw new BadRequestException('Product not found...');
+      return product_found;
     } catch (error) {
       throw error;
     }

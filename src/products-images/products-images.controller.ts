@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ProductImagesService } from './products-images.service';
 
 @Controller('products-images')
@@ -13,5 +13,10 @@ export class ProductsImagesController {
   @Put()
   updateProductImage(@Body() newProductImages) {
     return this.productImagesService.updateProductImage(newProductImages);
+  }
+
+  @Delete(':id')
+  deleteProduct(@Param('id', ParseIntPipe) id: number) {
+    return this.productImagesService.deleteProductImage(id);
   }
 }

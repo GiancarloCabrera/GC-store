@@ -38,11 +38,7 @@ export class ProductImagesService {
 
   async deleteProductImage(id: number) {
     try {
-      const found_img = await this.productImagesRepository.findOne({
-        where: {
-          id
-        }
-      });
+      const found_img = await this.findProductImageById(id);
 
       if (!found_img) throw new BadRequestException('Image not found...');
       return await this.productImagesRepository.remove(found_img);
@@ -69,6 +65,21 @@ export class ProductImagesService {
       Object.assign(found_img, image);
 
       return await this.productImagesRepository.save(found_img);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findProductImageById(id: number) {
+    try {
+      const found_img = await this.productImagesRepository.findOne({
+        where: {
+          id
+        }
+      });
+
+      if (!found_img) throw new BadRequestException('Image not found...');
+      return found_img;
     } catch (error) {
       throw error;
     }
