@@ -218,15 +218,15 @@ export class ProductsService {
         take: limit
       });
 
-      const totalPages = Math.ceil(total / limit);
-      const hasNextPage = page < totalPages;
+      const total_pages = Math.ceil(total / limit);
+      const has_next_page = page < total_pages;
 
       return {
         products,
         total,
         page,
-        totalPages,
-        hasNextPage
+        total_pages,
+        has_next_page
       }
     } catch (error) {
       throw error;

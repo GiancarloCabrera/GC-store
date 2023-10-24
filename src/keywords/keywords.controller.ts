@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { CreateKeywordDto } from './dto/create-Keyword.dto';
 import { KeywordService } from './keywords.service';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
@@ -22,4 +22,11 @@ export class KeywordsController {
     return this.keywordsService.deleteKeyword(id);
   }
 
+  @Get()
+  getAllProducts(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10
+  ) {
+    return this.keywordsService.getAllKeywords(page, limit);
+  }
 }

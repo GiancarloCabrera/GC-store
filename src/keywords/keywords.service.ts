@@ -95,4 +95,26 @@ export class KeywordService {
       throw error;
     }
   }
+
+  async getAllKeywords(page: number, limit: number) {
+    try {
+      const skip = (page - 1) * limit;
+      const [keywords, total] = await this.keywordRepository.findAndCount({
+        skip,
+        take: limit
+      });
+      const total_pages = Math.ceil(total / limit);
+      const has_next_page = page < total_pages;
+
+      return {
+        keywords,
+        total,
+        page,
+        total_pages,
+        has_next_page
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }

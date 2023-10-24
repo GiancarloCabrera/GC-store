@@ -84,4 +84,26 @@ export class ProductImagesService {
       throw error;
     }
   }
+
+  async getAllProductImages(page: number, limit: number) {
+    try {
+      const skip = (page - 1) * limit;
+      const [images, total] = await this.productImagesRepository.findAndCount({
+        skip,
+        take: limit
+      });
+      const total_pages = Math.ceil(total / limit);
+      const has_next_page = page < total_pages;
+
+      return {
+        images,
+        total,
+        page,
+        total_pages,
+        has_next_page
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }
