@@ -1,4 +1,9 @@
+import { IsNumber, IsString } from "class-validator"
+
 export class CreateProductImageDto {
-  path: string
-  productId: number
+  @IsString()
+  path: string;
+
+  @IsNumber()
+  productId: number;
 }

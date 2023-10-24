@@ -33,7 +33,11 @@ export class UsersService {
   }
 
   getUsers() {
-    return this.userRepository.find();
+    try {
+      return this.userRepository.find();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUser(id: number) {

@@ -8,7 +8,6 @@ import Keyword from "src/keywords/keywords.entity";
 import Opinion from "src/opinions/opinions.entity";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductImagesService } from '../products-images/products-images.service';
-import { KeywordService } from "src/keywords/keywords.service";
 
 @Injectable()
 export class ProductsService {
@@ -22,7 +21,6 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
-    // private keywordService: KeywordService
   ) { }
 
   async createProduct(product: CreateProductDto) {
@@ -91,11 +89,6 @@ export class ProductsService {
       // if (product.opinions) {
       //   product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
       // }
-
-      // Delete keyword
-      // product.keywords.forEach((keyword) => {
-      //   keyword.products = keyword.products.filter((p) => p.id !== productId);
-      // });
 
       // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
       return await this.productRepository.remove(product_found);

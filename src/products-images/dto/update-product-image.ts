@@ -1,5 +1,13 @@
+import { IsNumber, IsOptional, IsString } from "class-validator"
+
 export class UpdateProductImageDto {
-  id: number
-  path: string
-  productId?: number
+  @IsNumber()
+  id: number;
+
+  @IsString()
+  path: string;
+
+  @IsNumber()
+  @IsOptional()
+  productId?: number;
 }
