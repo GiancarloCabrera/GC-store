@@ -205,4 +205,31 @@ export class ProductsService {
       throw error;
     }
   }
+
+  async getAllProducts(page: number, limit: number) {
+    try {
+      const skip = (page - 1) * limit;
+      console.log(skip);
+
+      const [products, total] = await this.productRepository.findAndCount({
+        // Where should we start
+        skip,
+        // How many
+        take: limit
+      });
+
+      const totalPages = Math.ceil(total / limit);
+      const hasNextPage = page < totalPages;
+
+      return {
+        products,
+        total,
+        page,
+        totalPages,
+        hasNextPage
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }
