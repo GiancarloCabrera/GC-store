@@ -12,6 +12,7 @@ export class ProductImagesService {
     @InjectRepository(ProductImages) private productImagesRepository: Repository<ProductImages>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    // private readonly configService: ConfigService
   ) { }
 
   async createProductImage(image: CreateProductImageDto) {

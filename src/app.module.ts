@@ -16,6 +16,7 @@ import Product from './products/products.entity';
 import Opinion from './opinions/opinions.entity';
 import Keyword from './keywords/keywords.entity';
 import ProductImages from './products-images/products-images.entity';
+import { S3Module } from './S3/s3.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import ProductImages from './products-images/products-images.entity';
     ProductsModule,
     OpinionsModule,
     KeywordsModule,
-    ProductsImagesModule
+    ProductsImagesModule,
+    S3Module
   ],
   controllers: [AppController],
   providers: [
