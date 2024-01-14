@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
@@ -21,10 +21,13 @@ export class S3Service {
         })
       );
       console.log(s3);
+      // THIS IS THE URL OF THE FILE --> IMAGE
+      const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file_name}`;
+      console.log(url);
       if (s3.$metadata.httpStatusCode === 200) {
         return {
           msg: 'File successfully saved in S3',
-          img: s3.$metadata
+          file: { url, ...s3.$metadata }
         }
       }
       else {
@@ -37,13 +40,17 @@ export class S3Service {
 
   async getS3(file: string) {
     try {
-      const s3 = await this.s3_client.send(
-        new GetObjectCommand({
-          Bucket: process.env.AWS_S3_BUCKET,
-          Key: file,
-        })
-      );
-      console.log(s3);
+      // const s3 = await this.s3_client.send(
+      //   new GetObjectCommand({
+      //     Bucket: process.env.AWS_S3_BUCKET,
+      //     Key: file,
+      //   })
+      // );
+      // console.log(s3);
+      // THIS IS THE URL OF THE FILE --> IMAGE
+      const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file}`;
+      console.log(url);
+
       // if (s3.$metadata.httpStatusCode === 200) {
       //   return {
       //     msg: 'Found S3 file!',

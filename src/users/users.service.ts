@@ -64,9 +64,11 @@ export class UsersService {
           id
         }
       });
-      if (user_found.opinions) {
-        user_found.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
-      }
+      console.log(user_found);
+      // TODO: Solve the relation between user and opinions
+      // if (user_found.opinions) {
+      //   user_found.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
+      // }
       if (!user_found) throw new BadRequestException('User not found...');
       return await this.userRepository.remove(user_found);
     } catch (error) {

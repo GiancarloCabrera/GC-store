@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { S3Service } from './s3.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 

@@ -15,4 +15,6 @@ export class OpinionsController {
   deleteOpinion(@Param('id', ParseIntPipe) id: number) {
     return this.opinionsService.deleteOpinion(id);
   }
+
+  // TODO: Get opinions by user id and by product it
 }
