@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
@@ -21,10 +21,10 @@ export class S3Service {
         })
       );
       console.log(s3);
-      // THIS IS THE URL OF THE FILE --> IMAGE
-      const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file_name}`;
-      console.log(url);
       if (s3.$metadata.httpStatusCode === 200) {
+        // THIS IS THE URL OF THE FILE --> IMAGE
+        const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file_name}`;
+        console.log(url);
         return {
           msg: 'File successfully saved in S3',
           file: { url, ...s3.$metadata }
@@ -62,6 +62,39 @@ export class S3Service {
       // }
     } catch (error) {
       throw error;
+    }
+  }
+
+  async deleteS3(file_name: string) {
+    try {
+      // First check if the file exists
+
+      const existsFile = await this.s3_client.send(
+        new HeadObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: file_name,
+        })
+      );
+      console.log(existsFile);
+      if (existsFile.$metadata.httpStatusCode === 200) {
+        const deleteFile = await this.s3_client.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.AWS_S3_BUCKET,
+            Key: file_name,
+          })
+        );
+
+        console.log(deleteFile);
+        if (deleteFile.$metadata.httpStatusCode === 204) {
+          return {
+            msg: 'File successfully deleted from S3 Bucket',
+          };
+        } else {
+          throw new Error('File could not be deleted');
+        }
+      }
+    } catch (error) {
+      return error;
     }
   }
 }
