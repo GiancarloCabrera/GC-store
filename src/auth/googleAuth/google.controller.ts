@@ -4,7 +4,7 @@ import { GoogleAuthService } from './google.service';
 
 @Controller()
 export class GoogleAuthController {
-  constructor(private readonly googleAuthService: GoogleAuthService) { }
+  constructor(private readonly googleAuthService: GoogleAuthService) {}
 
   // @Get()
   // @UseGuards(AuthGuard('google'))
@@ -14,6 +14,6 @@ export class GoogleAuthController {
   @Get('auth/google/callback')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req) {
-    return this.googleAuthService.googleLogin(req)
+    return this.googleAuthService.googleLogin(req);
   }
 }

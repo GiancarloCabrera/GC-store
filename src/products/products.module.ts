@@ -9,8 +9,10 @@ import Opinion from 'src/opinions/opinions.entity';
 import { ProductImagesService } from 'src/products-images/products-images.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion])],
+  imports: [
+    TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion]),
+  ],
   controllers: [ProductsController],
-  providers: [ProductsService, ProductImagesService]
+  providers: [ProductsService, ProductImagesService],
 })
-export class ProductsModule { }
+export class ProductsModule {}

@@ -9,23 +9,23 @@ import { UpdateProductImageDto } from './dto/update-product-image';
 @Injectable()
 export class ProductImagesService {
   constructor(
-    @InjectRepository(ProductImages) private productImagesRepository: Repository<ProductImages>,
+    @InjectRepository(ProductImages)
+    private productImagesRepository: Repository<ProductImages>,
     @InjectRepository(Product)
-    private productRepository: Repository<Product>,
-    // private readonly configService: ConfigService
-  ) { }
+    private productRepository: Repository<Product>, // private readonly configService: ConfigService
+  ) {}
 
   async createProductImage(image: CreateProductImageDto) {
     try {
       const product_found = await this.productRepository.findOne({
         where: {
-          id: image.productId
-        }
+          id: image.productId,
+        },
       });
 
       if (!product_found) throw new BadRequestException('Product not found...');
 
-      let new_img = new ProductImages();
+      const new_img = new ProductImages();
       Object.assign(new_img, image);
 
       // Making relation
@@ -48,21 +48,23 @@ export class ProductImagesService {
     }
   }
 
-
   async updateProductImage(image: UpdateProductImageDto) {
     try {
-      const p_id = image.productId ? image.productId : null
+      const p_id = image.productId ? image.productId : null;
       const found_img = await this.productImagesRepository.findOne({
         relations: {
-          product: true
+          product: true,
         },
         where: {
           id: image.id,
-          product: { id: p_id }
-        }
+          product: { id: p_id },
+        },
       });
 
-      if (!found_img) throw new BadRequestException(`Image ${image.id} not found or its product Id does not belong to it... `);
+      if (!found_img)
+        throw new BadRequestException(
+          `Image ${image.id} not found or its product Id does not belong to it... `,
+        );
       Object.assign(found_img, image);
 
       return await this.productImagesRepository.save(found_img);
@@ -75,8 +77,8 @@ export class ProductImagesService {
     try {
       const found_img = await this.productImagesRepository.findOne({
         where: {
-          id
-        }
+          id,
+        },
       });
 
       if (!found_img) throw new BadRequestException('Image not found...');
@@ -91,7 +93,7 @@ export class ProductImagesService {
       const skip = (page - 1) * limit;
       const [images, total] = await this.productImagesRepository.findAndCount({
         skip,
-        take: limit
+        take: limit,
       });
       const total_pages = Math.ceil(total / limit);
       const has_next_page = page < total_pages;
@@ -101,8 +103,8 @@ export class ProductImagesService {
         total,
         page,
         total_pages,
-        has_next_page
-      }
+        has_next_page,
+      };
     } catch (error) {
       throw error;
     }

@@ -1,9 +1,17 @@
-import { Body, Controller, Delete, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ProductImagesService } from './products-images.service';
 
 @Controller('products-images')
 export class ProductsImagesController {
-  constructor(private productImagesService: ProductImagesService) { }
+  constructor(private productImagesService: ProductImagesService) {}
 
   @Post()
   createProductImage(@Body() newProductImages) {

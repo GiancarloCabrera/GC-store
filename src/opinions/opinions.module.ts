@@ -9,6 +9,6 @@ import User from 'src/users/user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Opinion, Product, User])],
   controllers: [OpinionsController],
-  providers: [OpinionsService]
+  providers: [OpinionsService],
 })
-export class OpinionsModule { }
+export class OpinionsModule {}
