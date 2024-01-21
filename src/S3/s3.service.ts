@@ -12,6 +12,8 @@ export class S3Service {
 
   async uploadS3(file_name: string, file: Buffer) {
     try {
+      console.log('S3 ', file_name, file);
+
       const s3 = await this.s3_client.send(
         new PutObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET,

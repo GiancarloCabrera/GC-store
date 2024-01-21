@@ -26,6 +26,7 @@ export class S3Controller {
 
     return await this.s3Service.getS3(file);
   }
+  // TODO: SET PARAMS, NOT ONLT / ON THE ENDPOINT
 
   @Delete(':file_name')
   async deleteFile(@Param('file_name') file_name: string) {

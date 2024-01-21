@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateProductImageDto } from './dto/create-product-images';
 import Product from 'src/products/products.entity';
 import { UpdateProductImageDto } from './dto/update-product-image';
+import { S3Service } from 'src/S3/s3.service';
 
 @Injectable()
 export class ProductImagesService {
@@ -12,7 +13,7 @@ export class ProductImagesService {
     @InjectRepository(ProductImages) private productImagesRepository: Repository<ProductImages>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-    // private readonly configService: ConfigService
+    private S3Service: S3Service
   ) { }
 
   async createProductImage(image: CreateProductImageDto) {
@@ -25,13 +26,17 @@ export class ProductImagesService {
 
       if (!product_found) throw new BadRequestException('Product not found...');
 
-      let new_img = new ProductImages();
-      Object.assign(new_img, image);
+      // Uploading file in S3
+      let s3 = await this.S3Service.uploadS3(image.file_name, image.file)
+      console.log(s3);
 
-      // Making relation
-      new_img.product = product_found;
+      // let new_img = new ProductImages();
+      // Object.assign(new_img, image);
 
-      return await this.productImagesRepository.save(new_img);
+      // // Making relation
+      // new_img.product = product_found;
+
+      // return await this.productImagesRepository.save(new_img);
     } catch (error) {
       throw error;
     }
