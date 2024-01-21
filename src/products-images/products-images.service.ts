@@ -17,27 +17,26 @@ export class ProductImagesService {
     private S3Service: S3Service
   ) { }
 
-  async createProductImage(image: CreateProductImageDto) {
+  async createProductImage(file: Express.Multer.File, product_id: number) {
     try {
       const product_found = await this.productRepository.findOne({
         where: {
-          id: image.productId,
+          id: product_id,
         },
       });
 
       if (!product_found) throw new BadRequestException('Product not found...');
 
       // Uploading file in S3
-      let s3 = await this.S3Service.uploadS3(image.file_name, image.file)
+      let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer)
       console.log(s3);
-
-      // let new_img = new ProductImages();
-      // Object.assign(new_img, image);
-
+      if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+      let new_img = new ProductImages();
+      new_img.path = s3.file.url;
       // // Making relation
-      // new_img.product = product_found;
+      new_img.product = product_found;
 
-      // return await this.productImagesRepository.save(new_img);
+      return await this.productImagesRepository.save(new_img);
     } catch (error) {
       throw error;
     }

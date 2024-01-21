@@ -21,7 +21,7 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
-  ) {}
+  ) { }
 
   async createProduct(product: CreateProductDto) {
     try {
@@ -33,8 +33,7 @@ export class ProductsService {
         p_images.push(p_img);
       }
 
-      if (!p_images)
-        throw new BadRequestException('Product Images could not be saved...');
+      if (!p_images) throw new BadRequestException('Product Images could not be saved...');
 
       // Association
       // Product ---> group of its images
