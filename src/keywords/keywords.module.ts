@@ -7,7 +7,6 @@ import Keyword from './keywords.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Keyword])],
   controllers: [KeywordsController],
-  providers: [KeywordService]
-
+  providers: [KeywordService],
 })
-export class KeywordsModule { }
+export class KeywordsModule {}

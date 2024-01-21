@@ -1,72 +1,88 @@
-import Keyword from "src/keywords/keywords.entity"
-import Opinion from "src/opinions/opinions.entity"
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import ProductImages from "../products-images/products-images.entity"
+import Keyword from 'src/keywords/keywords.entity';
+import Opinion from 'src/opinions/opinions.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import ProductImages from '../products-images/products-images.entity';
 
 @Entity()
 export default class Product {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
-  name: string
+  name: string;
 
   @Column()
-  description: string
+  description: string;
 
   @Column()
-  size: string
+  size: string;
 
   @Column()
-  color: string
+  color: string;
 
   @Column()
-  price: string
+  price: string;
 
   @Column()
-  category: string
+  category: string;
 
   @Column()
-  genre: string
+  genre: string;
 
   @Column()
-  material: string
+  material: string;
 
   @Column()
-  care_instruc: string
+  care_instruc: string;
 
   @Column()
-  model_num: number
+  model_num: number;
 
   @Column()
-  serie: number
+  serie: number;
 
   @Column()
-  on_stock: boolean
+  on_stock: boolean;
 
-  @OneToMany(type => ProductImages, productImages => productImages.product)
-  images: ProductImages[]
+  @OneToMany((type) => ProductImages, (productImages) => productImages.product)
+  images: ProductImages[];
 
   @Column()
-  shipment_details: string
+  shipment_details: string;
 
-  @ManyToMany(type => Keyword)
+  @ManyToMany((type) => Keyword)
   @JoinTable()
-  keywords: Keyword[]
+  keywords: Keyword[];
 
-  @OneToMany(type => Opinion, opinion => opinion.product)
-  opinions: Opinion[]
+  @OneToMany((type) => Opinion, (opinion) => opinion.product)
+  opinions: Opinion[];
 
   // Price - Notifications
   // -------------------
   // -------------------
 
   @Column()
-  status: string
+  status: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
-  createdAt: Date
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", onUpdate: "CURRENT_TIMESTAMP(6)" })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
   updated_at: Date;
 }

@@ -9,6 +9,6 @@ import { S3Service } from 'src/S3/s3.service';
 @Module({
   imports: [TypeOrmModule.forFeature([ProductImages, Product])],
   controllers: [ProductsImagesController],
-  providers: [ProductImagesService, S3Service]
+  providers: [ProductImagesService, S3Service],
 })
 export class ProductsImagesModule { }

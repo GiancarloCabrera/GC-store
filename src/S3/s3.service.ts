@@ -1,14 +1,18 @@
-import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { Injectable } from "@nestjs/common";
+import {
+  PutObjectCommand,
+  S3Client,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class S3Service {
-  constructor(
-  ) { }
+  constructor() {}
 
   private readonly s3_client = new S3Client({
-    region: process.env.AWS_S3_REGION
-  })
+    region: process.env.AWS_S3_REGION,
+  });
 
   async uploadS3(file_name: string, file: Buffer) {
     try {
@@ -18,9 +22,8 @@ export class S3Service {
         new PutObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET,
           Key: file_name,
-          Body: file
-
-        })
+          Body: file,
+        }),
       );
       console.log(s3);
       if (s3.$metadata.httpStatusCode === 200) {
@@ -29,11 +32,10 @@ export class S3Service {
         console.log(url);
         return {
           msg: 'File successfully saved in S3',
-          file: { url, ...s3.$metadata }
-        }
-      }
-      else {
-        throw new Error('File could not be saved')
+          file: { url, ...s3.$metadata },
+        };
+      } else {
+        throw new Error('File could not be saved');
       }
     } catch (error) {
       throw error;
@@ -75,7 +77,7 @@ export class S3Service {
         new HeadObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET,
           Key: file_name,
-        })
+        }),
       );
       console.log(existsFile);
       if (existsFile.$metadata.httpStatusCode === 200) {
@@ -83,7 +85,7 @@ export class S3Service {
           new DeleteObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: file_name,
-          })
+          }),
         );
 
         console.log(deleteFile);

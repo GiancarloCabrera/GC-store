@@ -1,5 +1,5 @@
 export class CreateOpinionDto {
-  text: string
-  productId: number
-  userId: number
+  text: string;
+  productId: number;
+  userId: number;
 }

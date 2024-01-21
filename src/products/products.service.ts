@@ -1,12 +1,12 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import Product from "./products.entity";
-import { Repository } from "typeorm";
-import { CreateProductDto } from "./dto/create-product.dto";
-import ProductImages from "../products-images/products-images.entity";
-import Keyword from "src/keywords/keywords.entity";
-import Opinion from "src/opinions/opinions.entity";
-import { UpdateProductDto } from "./dto/update-product.dto";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import Product from './products.entity';
+import { Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import ProductImages from '../products-images/products-images.entity';
+import Keyword from 'src/keywords/keywords.entity';
+import Opinion from 'src/opinions/opinions.entity';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductImagesService } from '../products-images/products-images.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
-  ) { }
+  ) {}
 
   async createProduct(product: CreateProductDto) {
     try {
@@ -33,7 +33,8 @@ export class ProductsService {
         p_images.push(p_img);
       }
 
-      if (!p_images) throw new BadRequestException('Product Images could not be saved...');
+      if (!p_images)
+        throw new BadRequestException('Product Images could not be saved...');
 
       // Association
       // Product ---> group of its images
@@ -45,8 +46,8 @@ export class ProductsService {
 
         let keyword = await this.keywordRepository.findOne({
           where: {
-            keyword: k_wd
-          }
+            keyword: k_wd,
+          },
         });
 
         if (!keyword) {
@@ -58,7 +59,8 @@ export class ProductsService {
         keywords_list.push(keyword);
       }
 
-      if (!keywords_list) throw new BadRequestException('Product Keywords could not be saved...');
+      if (!keywords_list)
+        throw new BadRequestException('Product Keywords could not be saved...');
 
       // Association
       // Product ---> group of its keywords
@@ -83,7 +85,9 @@ export class ProductsService {
       if (!product_found) throw new BadRequestException('Product not found...');
       console.log(product_found);
       if (product_found.images) {
-        product_found.images.forEach(async (img) => await this.productImageRepository.remove(img));
+        product_found.images.forEach(
+          async (img) => await this.productImageRepository.remove(img),
+        );
       }
 
       // if (product.opinions) {
@@ -134,33 +138,36 @@ export class ProductsService {
           const found_img = await this.productImageService.updateProductImage({
             id: img.id,
             path: img.path,
-            productId: product.id
+            productId: product.id,
           });
           found_product_img.push(found_img);
         }
 
-        const imgs_to_delete = product_found.images.filter(img_a => {
-          return !found_product_img.some(img_b => img_a.id === img_b.id);
+        const imgs_to_delete = product_found.images.filter((img_a) => {
+          return !found_product_img.some((img_b) => img_a.id === img_b.id);
         });
 
         // Delete
-        imgs_to_delete.forEach(img => this.productImageService.deleteProductImage(img.id));
+        imgs_to_delete.forEach((img) =>
+          this.productImageService.deleteProductImage(img.id),
+        );
         // Make the relation
         product.images = found_product_img;
       }
 
       // Keywords --> Manipulate only the relation
       if (product.keywords) {
-        const upd_keywords = []
+        const upd_keywords = [];
         for (const keyStr of product.keywords) {
           const k_wd = keyStr.toLowerCase();
-          let found_keyword = await this.keywordRepository.findOne({
+          const found_keyword = await this.keywordRepository.findOne({
             where: {
-              keyword: k_wd
-            }
+              keyword: k_wd,
+            },
           });
 
-          if (!found_keyword) throw new BadRequestException(`Keyword ${k_wd} not found...`);
+          if (!found_keyword)
+            throw new BadRequestException(`Keyword ${k_wd} not found...`);
           upd_keywords.push(found_keyword);
         }
         product.keywords = upd_keywords;
@@ -185,11 +192,11 @@ export class ProductsService {
         relations: {
           images: true,
           keywords: true,
-          opinions: true
+          opinions: true,
         },
         where: {
-          id
-        }
+          id,
+        },
       });
 
       if (!product_found) throw new BadRequestException('Product not found...');
@@ -208,7 +215,7 @@ export class ProductsService {
         // Where should we start
         skip,
         // How many
-        take: limit
+        take: limit,
       });
 
       const total_pages = Math.ceil(total / limit);
@@ -219,8 +226,8 @@ export class ProductsService {
         total,
         page,
         total_pages,
-        has_next_page
-      }
+        has_next_page,
+      };
     } catch (error) {
       throw error;
     }

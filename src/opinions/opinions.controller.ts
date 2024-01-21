@@ -1,10 +1,17 @@
-import { Body, Controller, Delete, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { OpinionsService } from './opinions.service';
 import { CreateOpinionDto } from './dto/create-opinion';
 
 @Controller('opinions')
 export class OpinionsController {
-  constructor(private opinionsService: OpinionsService) { }
+  constructor(private opinionsService: OpinionsService) {}
 
   @Post()
   createOpinion(@Body() newOpinion: CreateOpinionDto) {

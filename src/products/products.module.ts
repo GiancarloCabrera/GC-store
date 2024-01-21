@@ -10,7 +10,9 @@ import { ProductImagesService } from 'src/products-images/products-images.servic
 import { S3Service } from 'src/S3/s3.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion])],
+  imports: [
+    TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion]),
+  ],
   controllers: [ProductsController],
   providers: [ProductsService, ProductImagesService, S3Service]
 })

@@ -15,16 +15,15 @@ export class OpinionsService {
     private productRepository: Repository<Product>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async createOpinion(opinion: CreateOpinionDto) {
     try {
-
       // Search actual product
       const find_product = await this.productRepository.findOne({
         where: {
-          id: opinion.productId
-        }
+          id: opinion.productId,
+        },
       });
 
       if (!find_product) throw new BadRequestException('Product not found...');
@@ -32,14 +31,13 @@ export class OpinionsService {
       // Search user
       const find_user = await this.userRepository.findOne({
         where: {
-          id: opinion.userId
-        }
+          id: opinion.userId,
+        },
       });
-
 
       if (!find_user) throw new BadRequestException('User not found...');
 
-      let save_op = new Opinion();
+      const save_op = new Opinion();
       save_op.text = opinion.text;
       save_op.product = find_product;
       save_op.user = find_user;
