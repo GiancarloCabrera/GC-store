@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import Product from "./products.entity";
-import { Repository } from "typeorm";
-import { CreateProductDto } from "./dto/create-product.dto";
-import ProductImages from "../products-images/products-images.entity";
-import Keyword from "src/keywords/keywords.entity";
-import Opinion from "src/opinions/opinions.entity";
-import { UpdateProductDto } from "./dto/update-product.dto";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import Product from './products.entity';
+import { Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import ProductImages from '../products-images/products-images.entity';
+import Keyword from 'src/keywords/keywords.entity';
+import Opinion from 'src/opinions/opinions.entity';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductImagesService } from '../products-images/products-images.service';
+import { S3Service } from 'src/S3/s3.service';
 
 @Injectable()
 export class ProductsService {
@@ -21,14 +22,18 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
+    private S3Service: S3Service
   ) { }
 
-  async createProduct(product: CreateProductDto) {
+  async createProduct(product: CreateProductDto, files: any) {
     try {
       const p_images = [];
-      for (const img of product.images) {
+      for (const file of files) {
+        let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
+        if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+
         let p_img = new ProductImages();
-        p_img.path = img;
+        p_img.path = s3.file.url;
         p_img = await this.productImageRepository.save(p_img);
         p_images.push(p_img);
       }
@@ -39,30 +44,34 @@ export class ProductsService {
       // Product ---> group of its images
       product.images = p_images;
 
-      const keywords_list = [];
-      for (const keyStr of product.keywords) {
-        const k_wd = keyStr.toLowerCase();
+      if (product.keywords) {
 
-        let keyword = await this.keywordRepository.findOne({
-          where: {
-            keyword: k_wd
+        const keywords_list = [];
+        for (const keyStr of product.keywords) {
+          const k_wd = keyStr.toLowerCase();
+
+          let keyword = await this.keywordRepository.findOne({
+            where: {
+              keyword: k_wd,
+            },
+          });
+
+          if (!keyword) {
+            keyword = new Keyword();
+            keyword.keyword = k_wd;
+            keyword = await this.keywordRepository.save(keyword);
           }
-        });
 
-        if (!keyword) {
-          keyword = new Keyword();
-          keyword.keyword = k_wd;
-          keyword = await this.keywordRepository.save(keyword);
+          keywords_list.push(keyword);
         }
 
-        keywords_list.push(keyword);
+        if (!keywords_list)
+          throw new BadRequestException('Product Keywords could not be saved...');
+
+        // Association
+        // Product ---> group of its keywords
+        product.keywords = keywords_list;
       }
-
-      if (!keywords_list) throw new BadRequestException('Product Keywords could not be saved...');
-
-      // Association
-      // Product ---> group of its keywords
-      product.keywords = keywords_list;
 
       // if (product.opinions) {
       // }
@@ -83,7 +92,9 @@ export class ProductsService {
       if (!product_found) throw new BadRequestException('Product not found...');
       console.log(product_found);
       if (product_found.images) {
-        product_found.images.forEach(async (img) => await this.productImageRepository.remove(img));
+        product_found.images.forEach(
+          async (img) => await this.productImageRepository.remove(img),
+        );
       }
 
       // if (product.opinions) {
@@ -134,33 +145,36 @@ export class ProductsService {
           const found_img = await this.productImageService.updateProductImage({
             id: img.id,
             path: img.path,
-            productId: product.id
+            productId: product.id,
           });
           found_product_img.push(found_img);
         }
 
-        const imgs_to_delete = product_found.images.filter(img_a => {
-          return !found_product_img.some(img_b => img_a.id === img_b.id);
+        const imgs_to_delete = product_found.images.filter((img_a) => {
+          return !found_product_img.some((img_b) => img_a.id === img_b.id);
         });
 
         // Delete
-        imgs_to_delete.forEach(img => this.productImageService.deleteProductImage(img.id));
+        imgs_to_delete.forEach((img) =>
+          this.productImageService.deleteProductImage(img.id),
+        );
         // Make the relation
         product.images = found_product_img;
       }
 
       // Keywords --> Manipulate only the relation
       if (product.keywords) {
-        const upd_keywords = []
+        const upd_keywords = [];
         for (const keyStr of product.keywords) {
           const k_wd = keyStr.toLowerCase();
-          let found_keyword = await this.keywordRepository.findOne({
+          const found_keyword = await this.keywordRepository.findOne({
             where: {
-              keyword: k_wd
-            }
+              keyword: k_wd,
+            },
           });
 
-          if (!found_keyword) throw new BadRequestException(`Keyword ${k_wd} not found...`);
+          if (!found_keyword)
+            throw new BadRequestException(`Keyword ${k_wd} not found...`);
           upd_keywords.push(found_keyword);
         }
         product.keywords = upd_keywords;
@@ -185,11 +199,11 @@ export class ProductsService {
         relations: {
           images: true,
           keywords: true,
-          opinions: true
+          opinions: true,
         },
         where: {
-          id
-        }
+          id,
+        },
       });
 
       if (!product_found) throw new BadRequestException('Product not found...');
@@ -208,7 +222,7 @@ export class ProductsService {
         // Where should we start
         skip,
         // How many
-        take: limit
+        take: limit,
       });
 
       const total_pages = Math.ceil(total / limit);
@@ -219,8 +233,8 @@ export class ProductsService {
         total,
         page,
         total_pages,
-        has_next_page
-      }
+        has_next_page,
+      };
     } catch (error) {
       throw error;
     }

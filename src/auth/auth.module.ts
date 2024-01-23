@@ -5,4 +5,4 @@ import { ApiKeyModule } from './apiKeyAuth/apikey.module';
 @Module({
   imports: [ApiKeyModule, GoogleAuthModule],
 })
-export class AuthModule { }
+export class AuthModule {}

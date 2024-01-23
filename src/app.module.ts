@@ -25,7 +25,7 @@ import { S3Module } from './S3/s3.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: "postgres",
+      type: 'postgres',
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
       username: process.env.DB_USERNAME,
@@ -43,7 +43,7 @@ import { S3Module } from './S3/s3.module';
     OpinionsModule,
     KeywordsModule,
     ProductsImagesModule,
-    S3Module
+    S3Module,
   ],
   controllers: [AppController],
   providers: [
@@ -54,4 +54,4 @@ import { S3Module } from './S3/s3.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

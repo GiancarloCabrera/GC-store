@@ -7,10 +7,13 @@ import Keyword from 'src/keywords/keywords.entity';
 import ProductImages from '../products-images/products-images.entity';
 import Opinion from 'src/opinions/opinions.entity';
 import { ProductImagesService } from 'src/products-images/products-images.service';
+import { S3Service } from 'src/S3/s3.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion])],
+  imports: [
+    TypeOrmModule.forFeature([Product, Keyword, ProductImages, Opinion]),
+  ],
   controllers: [ProductsController],
-  providers: [ProductsService, ProductImagesService]
+  providers: [ProductsService, ProductImagesService, S3Service]
 })
 export class ProductsModule { }

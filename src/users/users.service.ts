@@ -1,10 +1,15 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import User from "./user.entity";
-import { Repository } from "typeorm";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUSerDto } from "./dto/update-user.dto";
-import Opinion from "src/opinions/opinions.entity";
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import User from './user.entity';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUSerDto } from './dto/update-user.dto';
+import Opinion from 'src/opinions/opinions.entity';
 
 @Injectable()
 export class UsersService {
@@ -12,18 +17,19 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Opinion)
-    private opinionRepository: Repository<Opinion>
-  ) { }
+    private opinionRepository: Repository<Opinion>,
+  ) {}
 
   async createUser(user: CreateUserDto) {
     try {
       const userFound = await this.userRepository.findOne({
         where: {
-          username: user.username
-        }
+          username: user.username,
+        },
       });
 
-      if (userFound) return new HttpException('User already exists', HttpStatus.NOT_FOUND);
+      if (userFound)
+        return new HttpException('User already exists', HttpStatus.NOT_FOUND);
 
       const newUser = this.userRepository.create(user);
       return this.userRepository.save(newUser);
@@ -44,10 +50,11 @@ export class UsersService {
     try {
       const userFound = await this.userRepository.findOne({
         where: {
-          id
-        }
+          id,
+        },
       });
-      if (!userFound) return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      if (!userFound)
+        return new HttpException('User not found', HttpStatus.NOT_FOUND);
       return userFound;
     } catch (error) {
       throw error;
@@ -58,15 +65,17 @@ export class UsersService {
     try {
       const user_found = await this.userRepository.findOne({
         relations: {
-          opinions: true
+          opinions: true,
         },
         where: {
-          id
-        }
+          id,
+        },
       });
-      if (user_found.opinions) {
-        user_found.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
-      }
+      console.log(user_found);
+      // TODO: Solve the relation between user and opinions
+      // if (user_found.opinions) {
+      //   user_found.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
+      // }
       if (!user_found) throw new BadRequestException('User not found...');
       return await this.userRepository.remove(user_found);
     } catch (error) {
@@ -78,10 +87,11 @@ export class UsersService {
     try {
       const userFound = await this.userRepository.findOne({
         where: {
-          id
-        }
+          id,
+        },
       });
-      if (!userFound) return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      if (!userFound)
+        return new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       const updUser = Object.assign(userFound, user);
       return await this.userRepository.save(updUser);

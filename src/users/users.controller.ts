@@ -1,12 +1,22 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
-import User from "./user.entity";
-import { UpdateUSerDto } from "./dto/update-user.dto";
+import User from './user.entity';
+import { UpdateUSerDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService) {}
 
   @Get()
   getUsers(): Promise<User[]> {
@@ -30,7 +40,10 @@ export class UsersController {
   }
 
   @Put(':id')
-  updateUser(@Param('id', ParseIntPipe) id: number, @Body() user: UpdateUSerDto) {
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() user: UpdateUSerDto,
+  ) {
     return this.usersService.updateUser(id, user);
   }
 }

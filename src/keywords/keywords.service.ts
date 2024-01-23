@@ -1,16 +1,16 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import Keyword from "./keywords.entity";
-import { CreateKeywordDto } from "./dto/create-Keyword.dto";
-import { UpdateKeywordDto } from "./dto/update-keyword.dto";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import Keyword from './keywords.entity';
+import { CreateKeywordDto } from './dto/create-Keyword.dto';
+import { UpdateKeywordDto } from './dto/update-keyword.dto';
 
 @Injectable()
 export class KeywordService {
   constructor(
     @InjectRepository(Keyword)
     private keywordRepository: Repository<Keyword>,
-  ) { }
+  ) {}
 
   // async createKeyword({ keywords }: CreateKeywordDto) {
   //   try {
@@ -37,20 +37,20 @@ export class KeywordService {
   //   }
   // }
 
-
   async createKeyword(keyword: CreateKeywordDto) {
     try {
       const k_wd = keyword.keyword.toLowerCase();
       const found_keyword = await this.keywordRepository.findOne({
         where: {
-          keyword: k_wd
-        }
+          keyword: k_wd,
+        },
       });
 
-      if (found_keyword) throw new BadRequestException(`Keyword already exists...`);
+      if (found_keyword)
+        throw new BadRequestException(`Keyword already exists...`);
 
-      let new_keyword = new Keyword();
-      new_keyword.keyword = k_wd
+      const new_keyword = new Keyword();
+      new_keyword.keyword = k_wd;
 
       return await this.keywordRepository.save(new_keyword);
     } catch (error) {
@@ -58,12 +58,11 @@ export class KeywordService {
     }
   }
 
-
   async deleteKeyword(id: number) {
     try {
       const found_keyword = await this.findKeywordById(id);
       if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
-      return await this.keywordRepository.remove(found_keyword)
+      return await this.keywordRepository.remove(found_keyword);
     } catch (error) {
       throw error;
     }
@@ -76,7 +75,7 @@ export class KeywordService {
       if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
       found_keyword.keyword = k_wd;
 
-      return await this.keywordRepository.save(found_keyword)
+      return await this.keywordRepository.save(found_keyword);
     } catch (error) {
       throw error;
     }
@@ -86,8 +85,8 @@ export class KeywordService {
     try {
       const found_keyword = this.keywordRepository.findOne({
         where: {
-          id
-        }
+          id,
+        },
       });
       if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
       return found_keyword;
@@ -101,7 +100,7 @@ export class KeywordService {
       const skip = (page - 1) * limit;
       const [keywords, total] = await this.keywordRepository.findAndCount({
         skip,
-        take: limit
+        take: limit,
       });
       const total_pages = Math.ceil(total / limit);
       const has_next_page = page < total_pages;
@@ -111,8 +110,8 @@ export class KeywordService {
         total,
         page,
         total_pages,
-        has_next_page
-      }
+        has_next_page,
+      };
     } catch (error) {
       throw error;
     }
