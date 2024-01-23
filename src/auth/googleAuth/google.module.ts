@@ -8,5 +8,4 @@ import { GoogleAuthController } from './google.controller';
   providers: [GoogleAuthService, GoogleStrategy],
   exports: [GoogleAuthService],
 })
-
-export class GoogleAuthModule { }
+export class GoogleAuthModule {}
