@@ -8,20 +8,25 @@ import {
   Post,
   Put,
   Query,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) { }
 
   @Post()
-  createProduct(@Body() newProduct: CreateProductDto) {
+  @UseInterceptors(FilesInterceptor('files'))
+  createProduct(@Body() newProduct: CreateProductDto, @UploadedFiles() files: Array<Express.Multer.File>) {
     console.log('from controller', newProduct);
+    console.log('from controller files', files);
 
-    return this.productsService.createProduct(newProduct);
+    return this.productsService.createProduct(newProduct, files);
   }
 
   @Put()

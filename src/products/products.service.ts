@@ -8,6 +8,7 @@ import Keyword from 'src/keywords/keywords.entity';
 import Opinion from 'src/opinions/opinions.entity';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductImagesService } from '../products-images/products-images.service';
+import { S3Service } from 'src/S3/s3.service';
 
 @Injectable()
 export class ProductsService {
@@ -21,14 +22,18 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
+    private S3Service: S3Service
   ) { }
 
-  async createProduct(product: CreateProductDto) {
+  async createProduct(product: CreateProductDto, files: any) {
     try {
       const p_images = [];
-      for (const img of product.images) {
+      for (const file of files) {
+        let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
+        if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+
         let p_img = new ProductImages();
-        p_img.path = img;
+        p_img.path = s3.file.url;
         p_img = await this.productImageRepository.save(p_img);
         p_images.push(p_img);
       }
@@ -39,31 +44,34 @@ export class ProductsService {
       // Product ---> group of its images
       product.images = p_images;
 
-      const keywords_list = [];
-      for (const keyStr of product.keywords) {
-        const k_wd = keyStr.toLowerCase();
+      if (product.keywords) {
 
-        let keyword = await this.keywordRepository.findOne({
-          where: {
-            keyword: k_wd,
-          },
-        });
+        const keywords_list = [];
+        for (const keyStr of product.keywords) {
+          const k_wd = keyStr.toLowerCase();
 
-        if (!keyword) {
-          keyword = new Keyword();
-          keyword.keyword = k_wd;
-          keyword = await this.keywordRepository.save(keyword);
+          let keyword = await this.keywordRepository.findOne({
+            where: {
+              keyword: k_wd,
+            },
+          });
+
+          if (!keyword) {
+            keyword = new Keyword();
+            keyword.keyword = k_wd;
+            keyword = await this.keywordRepository.save(keyword);
+          }
+
+          keywords_list.push(keyword);
         }
 
-        keywords_list.push(keyword);
+        if (!keywords_list)
+          throw new BadRequestException('Product Keywords could not be saved...');
+
+        // Association
+        // Product ---> group of its keywords
+        product.keywords = keywords_list;
       }
-
-      if (!keywords_list)
-        throw new BadRequestException('Product Keywords could not be saved...');
-
-      // Association
-      // Product ---> group of its keywords
-      product.keywords = keywords_list;
 
       // if (product.opinions) {
       // }
