@@ -60,11 +60,11 @@ export class UpdateProductDto {
   @IsOptional()
   on_stock?: boolean;
 
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => image)
-  images?: image[];
+  // @IsOptional()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => image)
+  // images?: image[];
 
   @IsString()
   @IsOptional()

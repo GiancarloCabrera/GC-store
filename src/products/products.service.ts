@@ -111,75 +111,54 @@ export class ProductsService {
     }
   }
 
-  async updateProduct(product: UpdateProductDto) {
+  async updateProduct(product: UpdateProductDto, files: any) {
     try {
       const product_found = await this.findProductById(product.id);
 
-      if (!product_found) throw new BadRequestException('Product not found...');
-
-      // Images
-      // Update only the image thye sent me
-      // if (product.images) {
-      // for (const img of product.images) {
-      //   const found_img = await this.productImagesRepository.findOne({
-      //     relations: {
-      //       product: true
-      //     },
-      //     where: {
-      //       id: img.id,
-      //     }
-      //   });
-
-      //   if (!found_img) throw new BadRequestException('Image not found...');
-      //   if (found_img.product.id !== product.id) throw new BadRequestException(`Image with id ${found_img.id} is not related to this product...`);
-      //   Object.assign(found_img, img);
-
-      //   const new_img = await this.productImageRepository.save(found_img);
-      //   actual_images.map(img => img.id === new_img.id ? new_img : img);
-      // }
-      // product_found.images = actual_images;
-      // }
-
       // Images --> Manipulate the relation & table
-      if (product.images) {
-        const found_product_img = [];
-        for (const img of product.images) {
-          // Update
-          const found_img = await this.productImageService.updateProductImage({
-            id: img.id,
-            path: img.path,
-            productId: product.id,
-          });
-          found_product_img.push(found_img);
+      if (files) {
+        // If there are images to delete
+        if (product_found.images) {
+          for (let img of product_found.images) {
+            // Using another try-catch to catch errors inside the for loop
+            try {
+              const p_img = await this.productImageService.deleteProductImage(img.id)
+              console.log('P_img ', p_img);
+              if (p_img.$metadata?.httpStatusCode === 404) return p_img;
+            } catch (error) {
+              throw error;
+            }
+          }
         }
 
-        const imgs_to_delete = product_found.images.filter((img_a) => {
-          return !found_product_img.some((img_b) => img_a.id === img_b.id);
-        });
+        // Updating new group of images
+        const p_images = [];
 
-        // Delete
-        imgs_to_delete.forEach((img) =>
-          this.productImageService.deleteProductImage(img.id),
-        );
-        // Make the relation
-        product.images = found_product_img;
+        for (const file of files) {
+          let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
+          if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+
+          let p_img = new ProductImages();
+          p_img.path = s3.file.url;
+          p_img = await this.productImageRepository.save(p_img);
+          p_images.push(p_img);
+        }
+
+        if (!p_images) throw new BadRequestException('Product Images could not be saved...');
+        product_found.images = p_images;
       }
 
       // Keywords --> Manipulate only the relation
       if (product.keywords) {
         const upd_keywords = [];
-        for (const keyStr of product.keywords) {
-          const k_wd = keyStr.toLowerCase();
-          const found_keyword = await this.keywordRepository.findOne({
-            where: {
-              keyword: k_wd,
-            },
-          });
-
-          if (!found_keyword)
-            throw new BadRequestException(`Keyword ${k_wd} not found...`);
-          upd_keywords.push(found_keyword);
+        // Create new keyword
+        for (const kwd of product.keywords) {
+          const low = kwd.toLowerCase();
+          const new_kwd = await this.keywordService.createKeyword(low);
+          upd_keywords.push(new_kwd);
         }
+
+        // Break actual relation
         product.keywords = upd_keywords;
       }
 
@@ -187,9 +166,7 @@ export class ProductsService {
       // if (product.opinions) {
 
       // }
-      console.log(product_found);
       Object.assign(product_found, product);
-
       return await this.productRepository.save(product_found);
     } catch (error) {
       throw error;

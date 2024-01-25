@@ -1,16 +1,13 @@
 import {
-  Body,
   Controller,
   Delete,
   Param,
   ParseIntPipe,
   Post,
-  Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductImagesService } from './products-images.service';
-import { CreateProductImageDto } from './dto/create-product-images';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('products-images')
@@ -26,11 +23,6 @@ export class ProductsImagesController {
     console.log(file, product_id);
 
     return this.productImagesService.createProductImage(file, product_id);
-  }
-
-  @Put()
-  updateProductImage(@Body() newProductImages) {
-    return this.productImagesService.updateProductImage(newProductImages);
   }
 
   @Delete(':id')
