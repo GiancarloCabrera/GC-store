@@ -10,68 +10,35 @@ export class KeywordService {
   constructor(
     @InjectRepository(Keyword)
     private keywordRepository: Repository<Keyword>,
-  ) {}
+  ) { }
 
-  // async createKeyword({ keywords }: CreateKeywordDto) {
-  //   try {
-  //     const keywords_list = [];
-  //     for (const keywordStr of keywords) {
-  //       let keyword = await this.keywordRepository.findOne({
-  //         where: {
-  //           keyword: keywordStr
-  //         }
-  //       });
-  //       if (!keyword) {
-  //         // Empty keyword entity
-  //         keyword = new Keyword();
-  //         keyword.keyword = keywordStr;
-  //         // Saving keyword to the database
-  //         keyword = await this.keywordRepository.save(keyword);
-  //       }
-  //       // Adding the created entities to the array
-  //       keywords_list.push(keyword);
-  //     }
-  //     return keywords_list;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-
-  async createKeyword(keyword: CreateKeywordDto) {
+  // async createKeyword(keyword: CreateKeywordDto) {
+  async createKeyword(keyword: string) {
     try {
-      const k_wd = keyword.keyword.toLowerCase();
+      const k_wd = keyword.toLowerCase();
       const found_keyword = await this.keywordRepository.findOne({
         where: {
           keyword: k_wd,
         },
       });
 
-      if (found_keyword)
-        throw new BadRequestException(`Keyword already exists...`);
+      if (!found_keyword) {
+        const new_keyword = new Keyword();
+        new_keyword.keyword = k_wd;
 
-      const new_keyword = new Keyword();
-      new_keyword.keyword = k_wd;
-
-      return await this.keywordRepository.save(new_keyword);
+        return await this.keywordRepository.save(new_keyword);
+      }
+      return found_keyword;
     } catch (error) {
       throw error;
     }
   }
 
-  async deleteKeyword(id: number) {
-    try {
-      const found_keyword = await this.findKeywordById(id);
-      if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
-      return await this.keywordRepository.remove(found_keyword);
-    } catch (error) {
-      throw error;
-    }
-  }
 
   async updateKeyword(keyword: UpdateKeywordDto) {
     try {
       const k_wd = keyword.keyword.toLowerCase();
-      const found_keyword = await this.findKeywordById(keyword.id);
+      const found_keyword = await this.getKeywordById(keyword.id);
       if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
       found_keyword.keyword = k_wd;
 
@@ -81,7 +48,17 @@ export class KeywordService {
     }
   }
 
-  async findKeywordById(id: number) {
+  async deleteKeyword(id: number) {
+    try {
+      const found_keyword = await this.getKeywordById(id);
+      if (!found_keyword) throw new BadRequestException(`Keyword not found...`);
+      return await this.keywordRepository.remove(found_keyword);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getKeywordById(id: number) {
     try {
       const found_keyword = this.keywordRepository.findOne({
         where: {

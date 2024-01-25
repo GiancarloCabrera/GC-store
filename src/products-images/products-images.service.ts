@@ -47,6 +47,15 @@ export class ProductImagesService {
       const found_img = await this.findProductImageById(id);
 
       if (!found_img) throw new BadRequestException('Image not found...');
+      console.log(found_img);
+      const fileName = found_img.path.substring(found_img.path.lastIndexOf("/") + 1);
+      console.log(fileName);
+
+      const s3 = await this.S3Service.deleteS3(fileName);
+      console.log('er: ', s3);
+
+      if (s3.$metadata?.httpStatusCode === 404) return s3;
+
       return await this.productImagesRepository.remove(found_img);
     } catch (error) {
       throw error;
