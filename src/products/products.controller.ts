@@ -30,8 +30,10 @@ export class ProductsController {
   }
 
   @Put()
-  updateProduct(@Body() updProduct: UpdateProductDto) {
-    return this.productsService.updateProduct(updProduct);
+  @UseInterceptors(FilesInterceptor('files'))
+
+  updateProduct(@Body() updProduct: UpdateProductDto, @UploadedFiles() files: Array<Express.Multer.File>) {
+    return this.productsService.updateProduct(updProduct, files);
   }
 
   @Delete(':id')
