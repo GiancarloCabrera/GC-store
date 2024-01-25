@@ -9,6 +9,7 @@ import Opinion from 'src/opinions/opinions.entity';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductImagesService } from '../products-images/products-images.service';
 import { S3Service } from 'src/S3/s3.service';
+import { KeywordService } from 'src/keywords/keywords.service';
 
 @Injectable()
 export class ProductsService {
@@ -22,7 +23,8 @@ export class ProductsService {
     @InjectRepository(Opinion)
     private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
-    private S3Service: S3Service
+    private S3Service: S3Service,
+    private keywordService: KeywordService
   ) { }
 
   async createProduct(product: CreateProductDto, files: any) {
@@ -48,25 +50,14 @@ export class ProductsService {
 
         const keywords_list = [];
         for (const keyStr of product.keywords) {
-          const k_wd = keyStr.toLowerCase();
+          const keyword = await this.keywordService.createKeyword(keyStr);
 
-          let keyword = await this.keywordRepository.findOne({
-            where: {
-              keyword: k_wd,
-            },
-          });
-
-          if (!keyword) {
-            keyword = new Keyword();
-            keyword.keyword = k_wd;
-            keyword = await this.keywordRepository.save(keyword);
-          }
+          if (!keyword) throw new BadRequestException(`${keyStr} could not be saved`);
 
           keywords_list.push(keyword);
         }
 
-        if (!keywords_list)
-          throw new BadRequestException('Product Keywords could not be saved...');
+        if (!keywords_list) throw new BadRequestException('Product Keywords could not be saved...');
 
         // Association
         // Product ---> group of its keywords
@@ -92,10 +83,20 @@ export class ProductsService {
       if (!product_found) throw new BadRequestException('Product not found...');
       console.log(product_found);
       if (product_found.images) {
-        product_found.images.forEach(
-          async (img) => await this.productImageRepository.remove(img),
-        );
+        for (let img of product_found.images) {
+          // Using another try-catch to catch errors inside the for loop
+          try {
+            const p_img = await this.productImageService.deleteProductImage(img.id)
+            console.log('P_img ', p_img);
+            if (p_img.$metadata?.httpStatusCode === 404) return p_img;
+            // img = p_img;
+          } catch (error) {
+            throw error;
+          }
+        }
       }
+
+      console.log('PRODUCT FOUND: ', product_found);
 
       // if (product.opinions) {
       //   product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
@@ -104,6 +105,8 @@ export class ProductsService {
       // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
       return await this.productRepository.remove(product_found);
     } catch (error) {
+      console.log('ENTRO ER: ', error);
+
       throw error;
     }
   }
