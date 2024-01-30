@@ -2,9 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import ProductImages from './products-images.entity';
 import { Repository } from 'typeorm';
-import { CreateProductImageDto } from './dto/create-product-images';
 import Product from 'src/products/products.entity';
-import { UpdateProductImageDto } from './dto/update-product-image';
 import { S3Service } from 'src/S3/s3.service';
 
 @Injectable()
@@ -29,11 +27,11 @@ export class ProductImagesService {
 
       // Uploading file in S3
       let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer)
-      console.log(s3);
+
       if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+
       let new_img = new ProductImages();
       new_img.path = s3.file.url;
-      // // Making relation
       new_img.product = product_found;
 
       return await this.productImagesRepository.save(new_img);
@@ -44,41 +42,23 @@ export class ProductImagesService {
 
   async deleteProductImage(id: number) {
     try {
-      const found_img = await this.findProductImageById(id);
+      const found_img = await this.getProductImageById(id);
 
       if (!found_img) throw new BadRequestException('Image not found...');
+
+      const fileName = found_img.path.substring(found_img.path.lastIndexOf("/") + 1);
+
+      const s3 = await this.S3Service.deleteS3(fileName);
+
+      if (s3.$metadata?.httpStatusCode === 404) return s3;
+
       return await this.productImagesRepository.remove(found_img);
     } catch (error) {
       throw error;
     }
   }
 
-  async updateProductImage(image: UpdateProductImageDto) {
-    try {
-      const p_id = image.productId ? image.productId : null;
-      const found_img = await this.productImagesRepository.findOne({
-        relations: {
-          product: true,
-        },
-        where: {
-          id: image.id,
-          product: { id: p_id },
-        },
-      });
-
-      if (!found_img)
-        throw new BadRequestException(
-          `Image ${image.id} not found or its product Id does not belong to it... `,
-        );
-      Object.assign(found_img, image);
-
-      return await this.productImagesRepository.save(found_img);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async findProductImageById(id: number) {
+  async getProductImageById(id: number) {
     try {
       const found_img = await this.productImagesRepository.findOne({
         where: {
@@ -112,6 +92,29 @@ export class ProductImagesService {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getProductImagesByProductId(id: number) {
+    const found_files = await this.productImagesRepository.find({
+      where: {
+        product: {
+          id
+        }
+      },
+    });
+
+    console.log(found_files);
+    if (!found_files.length) {
+      return {
+        msg: 'No files found...',
+        files: found_files
+      }
+    }
+
+    return {
+      msg: 'Files found...',
+      files: found_files
     }
   }
 }

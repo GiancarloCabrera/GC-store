@@ -23,15 +23,13 @@ export class ProductsController {
   @Post()
   @UseInterceptors(FilesInterceptor('files'))
   createProduct(@Body() newProduct: CreateProductDto, @UploadedFiles() files: Array<Express.Multer.File>) {
-    console.log('from controller', newProduct);
-    console.log('from controller files', files);
-
     return this.productsService.createProduct(newProduct, files);
   }
 
   @Put()
-  updateProduct(@Body() updProduct: UpdateProductDto) {
-    return this.productsService.updateProduct(updProduct);
+  @UseInterceptors(FilesInterceptor('files'))
+  updateProduct(@Body() updProduct: UpdateProductDto, @UploadedFiles() files: Array<Express.Multer.File>) {
+    return this.productsService.updateProduct(updProduct, files);
   }
 
   @Delete(':id')

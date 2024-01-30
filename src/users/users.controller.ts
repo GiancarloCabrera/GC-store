@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Put,
 } from '@nestjs/common';
@@ -16,7 +15,7 @@ import { UpdateUSerDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Get()
   getUsers(): Promise<User[]> {
@@ -24,7 +23,6 @@ export class UsersController {
   }
 
   @Get(':id')
-  // Parse to number
   getUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getUser(id);
   }

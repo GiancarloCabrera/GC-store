@@ -15,11 +15,11 @@ import { UpdateKeywordDto } from './dto/update-keyword.dto';
 
 @Controller('keywords')
 export class KeywordsController {
-  constructor(private keywordsService: KeywordService) {}
+  constructor(private keywordsService: KeywordService) { }
 
   @Post()
   createKeyword(@Body() newKeyword: CreateKeywordDto) {
-    return this.keywordsService.createKeyword(newKeyword);
+    return this.keywordsService.createKeyword(newKeyword.keyword);
   }
 
   @Put()
@@ -33,10 +33,17 @@ export class KeywordsController {
   }
 
   @Get()
-  getAllProducts(
+  getAllKeywords(
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
     return this.keywordsService.getAllKeywords(page, limit);
+  }
+
+  @Get(':id')
+  getKeywordById(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.keywordsService.getKeywordById(id);
   }
 }

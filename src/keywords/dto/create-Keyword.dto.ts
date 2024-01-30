@@ -1,6 +1,7 @@
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateKeywordDto {
+  @IsNotEmpty()
   @IsString()
   keyword: string;
 }
