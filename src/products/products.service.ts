@@ -25,7 +25,6 @@ export class ProductsService {
 
   async createProduct(product: CreateProductDto, files: any) {
     try {
-
       if (files) {
         const p_images = [];
         for (const file of files) {
@@ -46,13 +45,10 @@ export class ProductsService {
       }
 
       if (product.keywords) {
-
         const keywords_list = [];
         for (const keyStr of product.keywords) {
           const keyword = await this.keywordService.createKeyword(keyStr);
-
           if (!keyword) throw new BadRequestException(`${keyStr} could not be saved`);
-
           keywords_list.push(keyword);
         }
 
@@ -64,24 +60,20 @@ export class ProductsService {
       }
 
       const new_product = new Product();
-      console.log(new_product);
       Object.assign(new_product, product);
       const saved_product = await this.productRepository.save(new_product);
+
       if (product.opinions) {
         for (const op of product.opinions) {
-          console.log(op);
-          console.log(typeof op);
           const new_opinion = {
             text: op.text,
             productId: saved_product.id,
             userId: op.userId
           }
-
           let created_op = await this.opinionsService.createOpinion(new_opinion);
           console.log(created_op);
         }
       }
-
 
       return saved_product;
     } catch (error) {
@@ -93,23 +85,17 @@ export class ProductsService {
     try {
       const product_found = await this.findProductById(id);
 
-      if (!product_found) throw new BadRequestException('Product not found...');
-      console.log(product_found);
       if (product_found.images) {
         for (let img of product_found.images) {
           // Using another try-catch to catch errors inside the for loop
           try {
             const p_img = await this.productImageService.deleteProductImage(img.id)
-            console.log('P_img ', p_img);
             if (p_img.$metadata?.httpStatusCode === 404) return p_img;
-            // img = p_img;
           } catch (error) {
             throw error;
           }
         }
       }
-
-      console.log('PRODUCT FOUND: ', product_found);
 
       if (product_found.opinions) {
         product_found.opinions.forEach(async (op) => await this.opinionsService.deleteOpinion(op.id));
@@ -118,8 +104,6 @@ export class ProductsService {
       // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
       return await this.productRepository.remove(product_found);
     } catch (error) {
-      console.log('ENTRO ER: ', error);
-
       throw error;
     }
   }
@@ -130,7 +114,6 @@ export class ProductsService {
 
       // Images --> Manipulate the relation & table
       if (files) {
-        // If there are images to delete
         if (product_found.images) {
           for (let img of product_found.images) {
             // Using another try-catch to catch errors inside the for loop
@@ -144,9 +127,7 @@ export class ProductsService {
           }
         }
 
-        // Updating new group of images
         const p_images = [];
-
         for (const file of files) {
           let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
           if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
@@ -190,17 +171,12 @@ export class ProductsService {
             userId: op.userId
           }
           let created_op = await this.opinionsService.createOpinion(new_opinion);
-          console.log(created_op);
           new_op.push(created_op)
         }
-        console.log(new_op);
         product.opinions = new_op;
       }
 
-      console.log(product.opinions);
-
       Object.assign(product_found, product);
-      console.log(product_found);
 
       return await this.productRepository.save(product_found);
     } catch (error) {

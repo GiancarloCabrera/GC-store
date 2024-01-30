@@ -6,7 +6,7 @@ export class ApiKeysRepository {
   private keys: ApiKeyEntity[] = [
     {
       name: 'Test Client Key',
-      key: 'jisad-njksc2039u823nj-r23jff3f',
+      key: process.env.API_KEY,
     },
   ];
 

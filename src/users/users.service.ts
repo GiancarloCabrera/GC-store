@@ -9,16 +9,15 @@ import User from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUSerDto } from './dto/update-user.dto';
-import Opinion from 'src/opinions/opinions.entity';
+import { OpinionsService } from 'src/opinions/opinions.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(Opinion)
-    private opinionRepository: Repository<Opinion>,
-  ) {}
+    private opinionsService: OpinionsService
+  ) { }
 
   async createUser(user: CreateUserDto) {
     try {
@@ -38,9 +37,9 @@ export class UsersService {
     }
   }
 
-  getUsers() {
+  async getUsers() {
     try {
-      return this.userRepository.find();
+      return await this.userRepository.find();
     } catch (error) {
       throw error;
     }
@@ -53,8 +52,9 @@ export class UsersService {
           id,
         },
       });
-      if (!userFound)
-        return new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+      if (!userFound) return new HttpException('User not found', HttpStatus.NOT_FOUND);
+
       return userFound;
     } catch (error) {
       throw error;
@@ -72,11 +72,11 @@ export class UsersService {
         },
       });
       console.log(user_found);
-      // TODO: Solve the relation between user and opinions
-      // if (user_found.opinions) {
-      //   user_found.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
-      // }
       if (!user_found) throw new BadRequestException('User not found...');
+
+      // Delete user opinions
+      if (user_found.opinions.length) user_found.opinions.forEach(async (op) => await this.opinionsService.deleteOpinion(op.id));
+
       return await this.userRepository.remove(user_found);
     } catch (error) {
       throw error;

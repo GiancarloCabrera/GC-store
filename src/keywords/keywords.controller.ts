@@ -18,9 +18,8 @@ export class KeywordsController {
   constructor(private keywordsService: KeywordService) { }
 
   @Post()
-  // createKeyword(@Body() newKeyword: CreateKeywordDto) {
-  createKeyword(@Body('keyword') newKeyword: string) {
-    return this.keywordsService.createKeyword(newKeyword);
+  createKeyword(@Body() newKeyword: CreateKeywordDto) {
+    return this.keywordsService.createKeyword(newKeyword.keyword);
   }
 
   @Put()

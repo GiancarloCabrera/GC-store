@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -30,5 +31,13 @@ export class OpinionsController {
     return this.opinionsService.deleteOpinion(id);
   }
 
-  // TODO: Get opinions by user id and by product it
+  @Get('/user/:id')
+  getOpinionsByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.opinionsService.getOpinionsByUserId(id);
+  }
+
+  @Get('/product/:id')
+  getOpinionsByProductId(@Param('id', ParseIntPipe) id: number) {
+    return this.opinionsService.getOpinionsByProductId(id);
+  }
 }

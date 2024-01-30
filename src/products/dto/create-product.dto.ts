@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { CreateOpinionDto } from 'src/opinions/dto/create-opinion';
 
 export class CreateProductDto {
   @IsString()
@@ -57,7 +56,6 @@ export class CreateProductDto {
 
   @IsArray()
   @IsOptional()
-  // @Type(() => CreateOpinionDto)
   opinions?: OpinionDto[];
 
   @IsString()

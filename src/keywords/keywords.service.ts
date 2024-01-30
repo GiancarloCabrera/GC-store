@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Keyword from './keywords.entity';
-import { CreateKeywordDto } from './dto/create-Keyword.dto';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
 
 @Injectable()
@@ -12,7 +11,6 @@ export class KeywordService {
     private keywordRepository: Repository<Keyword>,
   ) { }
 
-  // async createKeyword(keyword: CreateKeywordDto) {
   async createKeyword(keyword: string) {
     try {
       const k_wd = keyword.toLowerCase();

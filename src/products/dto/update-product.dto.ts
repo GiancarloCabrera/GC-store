@@ -1,11 +1,9 @@
-import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
   IsNumber,
   IsOptional,
-  IsString,
-  ValidateNested,
+  IsString
 } from 'class-validator';
 
 export class UpdateProductDto {
@@ -60,12 +58,6 @@ export class UpdateProductDto {
   @IsOptional()
   on_stock?: boolean;
 
-  // @IsOptional()
-  // @IsArray()
-  // @ValidateNested({ each: true })
-  // @Type(() => image)
-  // images?: image[];
-
   @IsString()
   @IsOptional()
   shipment_details?: string;
@@ -87,12 +79,4 @@ export class UpdateProductDto {
 class OpinionDto {
   text: string;
   userId: number;
-}
-
-class image {
-  @IsNumber()
-  id: number;
-
-  @IsString()
-  path: string;
 }

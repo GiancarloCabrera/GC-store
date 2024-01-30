@@ -19,8 +19,6 @@ export class OpinionsService {
   ) { }
 
   async createOpinion(opinion: CreateOpinionDto) {
-    console.log(opinion);
-
     try {
       // Search actual product
       const find_product = await this.productRepository.findOne({
@@ -79,6 +77,44 @@ export class OpinionsService {
       return await this.opinionRepository.remove(op);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getOpinionsByUserId(id: number) {
+    const op = await this.opinionRepository.find({
+      where: {
+        user: { id }
+      }
+    });
+
+    if (!op.length) {
+      return {
+        msg: 'No opinions found...',
+        opinions: op
+      }
+    }
+    return {
+      msg: 'Opinions found...',
+      opinions: op
+    }
+  }
+
+  async getOpinionsByProductId(id: number) {
+    const op = await this.opinionRepository.find({
+      where: {
+        product: { id }
+      }
+    });
+
+    if (!op.length) {
+      return {
+        msg: 'No opinions found...',
+        opinions: op
+      }
+    }
+    return {
+      msg: 'Opinions found...',
+      opinions: op
     }
   }
 }

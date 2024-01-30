@@ -16,8 +16,6 @@ export class S3Service {
 
   async uploadS3(file_name: string, file: Buffer) {
     try {
-      console.log('S3 ', file_name, file);
-
       const s3 = await this.s3_client.send(
         new PutObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET,
@@ -25,7 +23,7 @@ export class S3Service {
           Body: file,
         }),
       );
-      console.log(s3);
+
       if (s3.$metadata.httpStatusCode === 200) {
         // THIS IS THE URL OF THE FILE --> IMAGE
         const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file_name}`;
@@ -42,46 +40,15 @@ export class S3Service {
     }
   }
 
-  async getS3(file: string) {
-    try {
-      // const s3 = await this.s3_client.send(
-      //   new GetObjectCommand({
-      //     Bucket: process.env.AWS_S3_BUCKET,
-      //     Key: file,
-      //   })
-      // );
-      // console.log(s3);
-      // THIS IS THE URL OF THE FILE --> IMAGE
-      const url = `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${file}`;
-      console.log(url);
-
-      // if (s3.$metadata.httpStatusCode === 200) {
-      //   return {
-      //     msg: 'Found S3 file!',
-      //     img: s3.$metadata
-      //   }
-      // }
-      // else {
-      //   throw new Error('Product image could not be saved')
-      // }
-    } catch (error) {
-      return error;
-    }
-  }
-
   async deleteS3(file_name: string) {
     try {
-      // First check if the file exists
-      console.log('pasoooooooooooooooo');
-
       const existsFile = await this.s3_client.send(
         new HeadObjectCommand({
           Bucket: process.env.AWS_S3_BUCKET,
-          // Key: file_name,
           Key: file_name,
         }),
       );
-      console.log('EXISTS FILE: ', existsFile);
+
       if (existsFile.$metadata.httpStatusCode === 200) {
         const deleteFile = await this.s3_client.send(
           new DeleteObjectCommand({
@@ -90,7 +57,6 @@ export class S3Service {
           }),
         );
 
-        console.log(deleteFile);
         if (deleteFile.$metadata.httpStatusCode === 204) {
           return {
             status: 204,
@@ -103,7 +69,6 @@ export class S3Service {
         throw new NotFoundException('File was not found...');
       }
     } catch (error) {
-      console.log('ERRORRRRR: ', error);
       if (error.$metadata.httpStatusCode === 404) {
         return {
           ...error,
