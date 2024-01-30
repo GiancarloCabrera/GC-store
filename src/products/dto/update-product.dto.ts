@@ -76,13 +76,17 @@ export class UpdateProductDto {
   keywords?: string[];
 
   @IsArray()
-  @IsString({ each: true })
   @IsOptional()
-  opinions?: string[];
+  opinions?: OpinionDto[];
 
   @IsString()
   @IsOptional()
   status?: string;
+}
+
+class OpinionDto {
+  text: string;
+  userId: number;
 }
 
 class image {

@@ -11,4 +11,4 @@ import User from 'src/users/user.entity';
   controllers: [OpinionsController],
   providers: [OpinionsService],
 })
-export class OpinionsModule {}
+export class OpinionsModule { }
