@@ -4,12 +4,11 @@ import Product from './products.entity';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import ProductImages from '../products-images/products-images.entity';
-import Keyword from 'src/keywords/keywords.entity';
-import Opinion from 'src/opinions/opinions.entity';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductImagesService } from '../products-images/products-images.service';
 import { S3Service } from 'src/S3/s3.service';
 import { KeywordService } from 'src/keywords/keywords.service';
+import { OpinionsService } from 'src/opinions/opinions.service';
 
 @Injectable()
 export class ProductsService {
@@ -18,33 +17,33 @@ export class ProductsService {
     private productRepository: Repository<Product>,
     @InjectRepository(ProductImages)
     private productImageRepository: Repository<ProductImages>,
-    @InjectRepository(Keyword)
-    private keywordRepository: Repository<Keyword>,
-    @InjectRepository(Opinion)
-    private opinionRepository: Repository<Opinion>,
     private productImageService: ProductImagesService,
     private S3Service: S3Service,
-    private keywordService: KeywordService
+    private keywordService: KeywordService,
+    private opinionsService: OpinionsService
   ) { }
 
   async createProduct(product: CreateProductDto, files: any) {
     try {
-      const p_images = [];
-      for (const file of files) {
-        let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
-        if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
 
-        let p_img = new ProductImages();
-        p_img.path = s3.file.url;
-        p_img = await this.productImageRepository.save(p_img);
-        p_images.push(p_img);
+      if (files) {
+        const p_images = [];
+        for (const file of files) {
+          let s3 = await this.S3Service.uploadS3(file.originalname.trim(), file.buffer);
+          if (s3.file.httpStatusCode !== 200) throw new BadRequestException('Image could not be saved...');
+
+          let p_img = new ProductImages();
+          p_img.path = s3.file.url;
+          p_img = await this.productImageRepository.save(p_img);
+          p_images.push(p_img);
+        }
+
+        if (!p_images) throw new BadRequestException('Product Images could not be saved...');
+
+        // Association
+        // Product ---> group of its images
+        product.images = p_images;
       }
-
-      if (!p_images) throw new BadRequestException('Product Images could not be saved...');
-
-      // Association
-      // Product ---> group of its images
-      product.images = p_images;
 
       if (product.keywords) {
 
@@ -64,13 +63,27 @@ export class ProductsService {
         product.keywords = keywords_list;
       }
 
-      // if (product.opinions) {
-      // }
-
       const new_product = new Product();
+      console.log(new_product);
       Object.assign(new_product, product);
+      const saved_product = await this.productRepository.save(new_product);
+      if (product.opinions) {
+        for (const op of product.opinions) {
+          console.log(op);
+          console.log(typeof op);
+          const new_opinion = {
+            text: op.text,
+            productId: saved_product.id,
+            userId: op.userId
+          }
 
-      return await this.productRepository.save(new_product);
+          let created_op = await this.opinionsService.createOpinion(new_opinion);
+          console.log(created_op);
+        }
+      }
+
+
+      return saved_product;
     } catch (error) {
       throw error;
     }
@@ -98,9 +111,9 @@ export class ProductsService {
 
       console.log('PRODUCT FOUND: ', product_found);
 
-      // if (product.opinions) {
-      //   product.opinions.forEach(async (op) => await this.opinionRepository.remove(op));
-      // }
+      if (product_found.opinions) {
+        product_found.opinions.forEach(async (op) => await this.opinionsService.deleteOpinion(op.id));
+      }
 
       // ONCE THE PRODUCT IS REMOVED, WILL BE REMOVED FROM THE RELATION product_keywords automatically
       return await this.productRepository.remove(product_found);
@@ -163,10 +176,32 @@ export class ProductsService {
       }
 
       // Opinions
-      // if (product.opinions) {
+      if (product.opinions) {
+        // Delete actual ones
+        if (product_found.opinions) {
+          product_found.opinions.forEach(async (op) => await this.opinionsService.deleteOpinion(op.id));
+        }
+        // Create new ones
+        const new_op = []
+        for (const op of product.opinions) {
+          const new_opinion = {
+            text: op.text,
+            productId: product_found.id,
+            userId: op.userId
+          }
+          let created_op = await this.opinionsService.createOpinion(new_opinion);
+          console.log(created_op);
+          new_op.push(created_op)
+        }
+        console.log(new_op);
+        product.opinions = new_op;
+      }
 
-      // }
+      console.log(product.opinions);
+
       Object.assign(product_found, product);
+      console.log(product_found);
+
       return await this.productRepository.save(product_found);
     } catch (error) {
       throw error;
