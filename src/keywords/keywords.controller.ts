@@ -12,7 +12,10 @@ import {
 import { CreateKeywordDto } from './dto/create-Keyword.dto';
 import { KeywordService } from './keywords.service';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 
+@ApiSecurity('Api-Key')
+@ApiTags('Keywords')
 @Controller('keywords')
 export class KeywordsController {
   constructor(private keywordsService: KeywordService) { }
