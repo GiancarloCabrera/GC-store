@@ -11,7 +11,10 @@ import {
 } from '@nestjs/common';
 import { ProductImagesService } from './products-images.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 
+@ApiSecurity('Api-Key')
+@ApiTags('Product Images')
 @Controller('product-image')
 export class ProductsImagesController {
   constructor(private productImagesService: ProductImagesService) { }
