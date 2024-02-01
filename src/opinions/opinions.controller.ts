@@ -11,7 +11,10 @@ import {
 import { OpinionsService } from './opinions.service';
 import { CreateOpinionDto } from './dto/create-opinion';
 import { UpdateOpinionDto } from './dto/update-opinion';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 
+@ApiSecurity('Api-Key')
+@ApiTags('Opinions')
 @Controller('opinions')
 export class OpinionsController {
   constructor(private opinionsService: OpinionsService) { }
